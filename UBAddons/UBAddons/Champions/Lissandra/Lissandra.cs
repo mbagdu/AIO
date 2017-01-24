@@ -197,9 +197,6 @@ namespace UBAddons.Champions.Lissandra
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.E, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.R, "KillSteal");
-                    MiscMenu.AddGroupLabel("Deny Recall settings");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString());
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.E, Misc_Menu_Value.DenyRecall.ToString(), false);
                 }
                 #endregion
 
@@ -330,18 +327,6 @@ namespace UBAddons.Champions.Lissandra
                 {
                     CastE(target, false);
                 }
-            }
-        }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || args.Type != TeleportType.Recall) return;
-            if (MenuValue.Misc.QRecall && Q.IsReady() && Q.IsInRange(sender))
-            {
-                Q.Cast(sender);
-            }
-            else if (MenuValue.Misc.ERecall && E.IsReady() && E.IsInRange(sender))
-            {
-                CastE(sender, false);
             }
         }
         #endregion
@@ -580,11 +565,6 @@ namespace UBAddons.Champions.Lissandra
                 public static DangerLevel[] DangerValue { get { return MiscMenu.GetDangerValue(); } }
 
                 public static bool RI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.R, Misc_Menu_Value.Interrupter.ToString()); } }
-
-                public static bool QRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
-
-                public static bool ERecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.E, Misc_Menu_Value.DenyRecall.ToString()); } }
-
             }
 
             internal static class Drawings

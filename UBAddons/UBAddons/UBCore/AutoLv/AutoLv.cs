@@ -10,11 +10,12 @@ using System.Drawing;
 using System.Linq;
 using UBAddons.General;
 using UBAddons.Libs;
+using UBAddons.Libs.Base;
 using UBAddons.Log;
 
 namespace UBAddons.UBCore.AutoLv
 {
-    class AutoLv
+    class AutoLv : IModuleBase
     {
         internal static Menu LvMenu;
         public static bool Initialized { get; private set; }
@@ -205,7 +206,6 @@ namespace UBAddons.UBCore.AutoLv
                             }
                         };
                     }
-                    Game.OnTick += OnLevelUp;
                 }
                 catch (Exception e)
                 {
@@ -214,7 +214,7 @@ namespace UBAddons.UBCore.AutoLv
             }
         }
 
-        private static void OnLevelUp(EventArgs args)
+        private static void OnLevelUp()
         {
             if (!LvMenu.VChecked("Enable") || Player.Instance.SpellTrainingPoints.Equals(0)) return;
             LevelUp(Database.ConvertToSpellSlot()[Player.Instance.Level - 1]);           
@@ -238,6 +238,11 @@ namespace UBAddons.UBCore.AutoLv
             }, Delay);
         }
 
+        public void OnLoad()
+        {
+            Initialize();
+        }
+
         public static void Initialize()
         {
             if (Initialized)
@@ -245,6 +250,16 @@ namespace UBAddons.UBCore.AutoLv
                 return;
             }
             Initialized = true;
+        }
+
+        public bool ShouldExecuted()
+        {
+            return LvMenu.VChecked("Enable") && !Player.Instance.SpellTrainingPoints.Equals(0);                 
+        }
+
+        public void Execute()
+        {
+            OnLevelUp();
         }
     }
 }

@@ -227,10 +227,6 @@ namespace UBAddons.Champions.Alistar
                 E.Cast();
             }
         }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            return;
-        }
         #endregion
 
         #region Damage

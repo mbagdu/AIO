@@ -1,20 +1,21 @@
-﻿using System;
-using System.Linq;
-using EloBuddy;
+﻿using EloBuddy;
+using EloBuddy.Sandbox;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Spells;
-using EloBuddy.Sandbox;
-using UBAddons.Libs.Dictionary;
-using UBAddons.Libs.ColorPicker;
-using UBAddons.Libs;
+using System;
+using System.Linq;
 using UBAddons.General;
+using UBAddons.Libs;
+using UBAddons.Libs.Base;
+using UBAddons.Libs.ColorPicker;
+using UBAddons.Libs.Dictionary;
 
 namespace UBAddons.UBCore.Activator
 {
-    class Main
+    class Main : IModuleBase
     {
         public static bool Initialized { get; private set; }
         public static Menu Activator, Potions, AttackMenu, DefensiveMenu, List, UtilityMenu, SpellsMenu, Clean;
@@ -26,35 +27,7 @@ namespace UBAddons.UBCore.Activator
                 try
                 {
                     Activator = MainMenu.AddMenu("UBActivator", "UBActivator", "Activator for UBAddons");
-                    Activator.AddLabel("Global Settings");
-                    Activator.AddLabel("Must F5 to take effect");
-                    var OnTickButton = Activator.Add("UBActivator.OnTick", new CheckBox("Use Game.OnTick (More fps)"));
-                    var OnUpdateButton = Activator.Add("UBActivator.OnUpdate", new CheckBox("Use Game.OnUpdate (Faster rection)", false));
-                    OnUpdateButton.OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
-                    {
-                        if (args.NewValue)
-                        {
-                            OnTickButton.CurrentValue = false;
-                            return;
-                        }
-                        if (!OnTickButton.CurrentValue)
-                        {
-                            OnUpdateButton.CurrentValue = true;
-                        }
-                    };
-                    OnTickButton.OnValueChange += delegate(ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
-                    {
-                        if (args.NewValue)
-                        {
-                            OnUpdateButton.CurrentValue = false;
-                            return;
-                        }
-                        if (!OnUpdateButton.CurrentValue)
-                        {
-                            OnTickButton.CurrentValue = true;
-                        }
-                    };
-
+                    Activator.AddLabel("Wait to ignoredev fix the event, so now this Activator is useless");
                     if (SummonerSpells.PlayerHas(SummonerSpellsEnum.Heal) || SummonerSpells.PlayerHas(SummonerSpellsEnum.Ignite) 
                         || SummonerSpells.PlayerHas(SummonerSpellsEnum.Exhaust) || SummonerSpells.PlayerHas(SummonerSpellsEnum.Barrier) ||
                           SummonerSpells.PlayerHas(SummonerSpellsEnum.Mark) || SummonerSpells.PlayerHas(SummonerSpellsEnum.Smite))
@@ -900,14 +873,14 @@ namespace UBAddons.UBCore.Activator
                         Log.UBNotification.ShowNotif("UBAdddons Notification", "You just buy a Supported Item, please check menu", "blue");
                     }
                 };
-                if (Activator["UBActivator.OnTick"].Cast<CheckBox>().CurrentValue)
-                {
-                    Game.OnTick += Game_On;
-                }
-                if (Activator["UBActivator.OnUpdate"].Cast<CheckBox>().CurrentValue)
-                {
-                    Game.OnUpdate += Game_On;
-                }
+                //if (Activator["UBActivator.OnTick"].Cast<CheckBox>().CurrentValue)
+                //{
+                //    Game.OnTick += Game_On;
+                //}
+                //if (Activator["UBActivator.OnUpdate"].Cast<CheckBox>().CurrentValue)
+                //{
+                //    Game.OnUpdate += Game_On;
+                //}
                 Gapcloser.OnGapcloser += AttackItem.OnGapCloser;
                 Orbwalker.OnPostAttack += AttackItem.OnPostAttack;
                 Orbwalker.OnPreAttack += AttackItem.OnPreAttack;
@@ -917,8 +890,17 @@ namespace UBAddons.UBCore.Activator
                 GameObject.OnCreate += Spells.GameObject_OnCreate;
             }
         }
+        public bool ShouldExecuted()
+        {
+            return true;
+        }
 
-        private static void Game_On(EventArgs args)
+        public void OnLoad()
+        {
+            Initialize();
+        }
+
+        public void Execute()
         {
             AttackItem.Bork();
             AttackItem.Hextech();
@@ -932,6 +914,7 @@ namespace UBAddons.UBCore.Activator
         /// </summary>
         public static void Initialize()
         {
+
             if (Initialized)
             {
                 return;

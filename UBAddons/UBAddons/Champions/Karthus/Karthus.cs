@@ -123,8 +123,6 @@ namespace UBAddons.Champions.Karthus
                     MiscMenu.CreatSlotCheckBox(SpellSlot.Q, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.E, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.R, "KillSteal");
-                    MiscMenu.AddGroupLabel("Deny Recall settings");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString());
                 }
                 #endregion
 
@@ -202,14 +200,6 @@ namespace UBAddons.Champions.Karthus
                 {
                     E.Cast(target);
                 }
-            }
-        }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || args.Type != TeleportType.Recall) return;
-            if (MenuValue.Misc.QRecall && Q.IsReady() && Q.IsInRange(sender))
-            {
-                Q.Cast(sender);
             }
         }
         #endregion
@@ -446,9 +436,6 @@ namespace UBAddons.Champions.Karthus
                 public static bool Idiot { get { return MiscMenu.PreventIdiotAntiGap(); } }
 
                 public static bool WGap { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.GapCloser.ToString()); } }
-
-                public static bool QRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
-
             }
 
             internal static class Drawings

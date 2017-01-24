@@ -226,10 +226,6 @@ namespace UBAddons.Champions.Kayle
                 Q.Cast(target);
             }
         }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            return;
-        }
         #endregion
 
         #region Damage

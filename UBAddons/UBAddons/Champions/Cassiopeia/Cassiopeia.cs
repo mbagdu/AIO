@@ -129,9 +129,6 @@ namespace UBAddons.Champions.Cassiopeia
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.E, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.R, "KillSteal");
-                    MiscMenu.AddGroupLabel("Deny Recall settings");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString());
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.W, Misc_Menu_Value.DenyRecall.ToString());
                 }
                 #endregion
 
@@ -188,21 +185,6 @@ namespace UBAddons.Champions.Cassiopeia
                 var predHealth = E.GetHealthPrediction(target);
                 if (predHealth < float.Epsilon) return;
                 E.Cast(target);
-            }
-        }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            if (sender == null || !sender.IsEnemy || !sender.IsValid || args.Type != TeleportType.Recall) return;
-            if (MenuValue.Misc.QRecall && Q.IsReady() && Q.IsInRange(sender))
-            {
-                Q.Cast(sender);
-            }
-            else if (MenuValue.Misc.WRecall && W.IsReady() && W.IsInRange(sender))
-            {
-                if  (!sender.IsInRange(player, WMinRange))
-                {
-                    W.Cast(sender);
-                }
             }
         }
         #endregion
@@ -449,11 +431,6 @@ namespace UBAddons.Champions.Cassiopeia
                 public static DangerLevel[] dangerValue { get { return MiscMenu.GetDangerValue(); } }
 
                 public static bool RI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.R, Misc_Menu_Value.Interrupter.ToString()); } }
-
-                public static bool QRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
-
-                public static bool WRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
-
             }
 
             internal static class Drawings

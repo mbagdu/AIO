@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UBAddons</RootNamespace>
     <AssemblyName>UBAddons</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
@@ -311,7 +311,11 @@
     <Compile Include="Champions\Zilean\Modes\LaneClear.cs" />
     <Compile Include="Champions\Zilean\Modes\LastHit.cs" />
     <Compile Include="Champions\Zilean\Modes\PermaActive.cs" />
+    <Compile Include="Libs\Base\IModuleBase.cs" />
     <Compile Include="Libs\Dictionary\VectorHelper.cs" />
+    <Compile Include="Libs\FPS_Protect.cs" />
+    <Compile Include="Libs\ImmobileTracker.cs" />
+    <Compile Include="Libs\Plugin\UtilityPlugin.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -344,7 +348,7 @@
     <Compile Include="General\Structs.cs" />
     <Compile Include="General\Variables.cs" />
     <Compile Include="Libs\Base\IHeroBase.cs" />
-    <Compile Include="Libs\ChampionPlugin.cs" />
+    <Compile Include="Libs\Plugin\ChampionPlugin.cs" />
     <Compile Include="Libs\ColorPicker\ColorPicker.cs" />
     <Compile Include="Libs\ColorPicker\ColorReader.cs" />
     <Compile Include="Libs\DamageIndicator.cs" />

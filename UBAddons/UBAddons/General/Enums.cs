@@ -13,7 +13,6 @@
         KillSteal,
         Interrupter,
         GapCloser,
-        DenyRecall,
     }
     public enum TargetSeclect
     {
@@ -47,5 +46,14 @@
         Smite,
         AutoAttack,
         Item,
+    }
+    public enum EUtility
+    {
+        Activator,
+        ADOrbwalker,
+        AutoLv,
+        BaseUlt,
+        ImmobileTracker,
+        JumpSpot,
     }
 }

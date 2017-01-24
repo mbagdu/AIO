@@ -6,6 +6,7 @@ using EloBuddy.SDK.Menu.Values;
 using System;
 using System.Linq;
 using UBAddons.Libs;
+using UBAddons.Libs.Base;
 using UBAddons.Libs.ColorPicker;
 using UBAddons.Libs.Dictionary;
 using EloBuddy.SDK.Rendering;
@@ -20,6 +21,9 @@ namespace UBAddons.UBCore
         private static bool IplayEkko { get { return Player.Instance.Hero == Champion.Ekko || Player.Instance.Hero == Champion.Akali; } }
         private static bool IplayVelkoz { get { return Player.Instance.Hero == Champion.Velkoz; } }
 
+        public static bool UseOnTick => Core.VChecked("Core.OnTick");
+        public static bool UseOnUpdate => Core.VChecked("Core.OnUpdate");
+
         private static bool Initialized { get; set; }
         static CoreMenu()
         {
@@ -28,22 +32,48 @@ namespace UBAddons.UBCore
                 Core = MainMenu.AddMenu("UBAddons", "UBAddons.Core", "Core of UBAddons");
                 Core.AddGroupLabel("UBAddons - version " + typeof(CoreMenu).Assembly.GetName().Version.ToString());
                 Core.AddLabel("Made by Uzumaki Boruto. ~Dattebasa~");
-                Core.AddGroupLabel("Core Inject");
+                Core.AddGroupLabel("Inject Option");
+                Core.Add("Core.Activator", new CheckBox("Inject Activator"));
+                Core.Add("Core.BaseUlt", new CheckBox("Inject BaseUlt"));
+                Core.Add("Core.AutoLv", new CheckBox("Inject Auto level up"));
+                //Core.Add("Core.Surrender", new CheckBox("Inject Surrender Tracker", false)); this is no need
+                if (Variables.IsADC)
                 {
-                    Core.AddGroupLabel("Inject Option");
-                    Core.Add("Core.Activator", new CheckBox("Inject Activator"));
-                    Core.Add("Core.BaseUlt", new CheckBox("Inject BaseUlt"));
-                    Core.Add("Core.AutoLv", new CheckBox("Inject Auto level up"));
-                    //Core.Add("Core.Surrender", new CheckBox("Inject Surrender Tracker", false)); this is no need
-                    if (Variables.IsADC)
-                    {
-                        Core.Add("Core.Orbwalker", new CheckBox("Inject Extension for OrbWalker"));
-                    }
-                    Core.AddGroupLabel("FPS Protector");
-                    Core.Add("Core.Enable.FPS", new CheckBox("Enable FPS Protection"));
-                    Core.Add("Core.Min.FPS", new Slider("Min Fps", 45, 1, 300));
-                    Core.Add("Core.Calculate", new Slider("Calculations per second", 35, 1, 350));
+                    Core.Add("Core.Orbwalker", new CheckBox("Inject Extension for OrbWalker"));
                 }
+                Core.AddGroupLabel("FPS Protector");
+                Core.Add("Core.Enable.FPS", new CheckBox("Enable FPS Protection"));
+                Core.Add("Core.Min.FPS", new Slider("Min Fps", 45, 1, 300));
+                Core.Add("Core.Calculate", new Slider("Calculations per second", 35, 1, 350));
+                Core.AddGroupLabel("Global Settings");
+                Core.AddLabel("Must F5 to take effect");
+                var OnTickButton = Core.Add("Core.OnTick", new CheckBox("Use Game.OnTick (More fps)"));
+                var OnUpdateButton = Core.Add("Core.OnUpdate", new CheckBox("Use Game.OnUpdate (Faster rection)", false));
+                OnUpdateButton.OnValueChange += delegate (ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
+                {
+                    if (args.NewValue)
+                    {
+                        OnTickButton.CurrentValue = false;
+                        return;
+                    }
+                    if (!OnTickButton.CurrentValue)
+                    {
+                        OnUpdateButton.CurrentValue = true;
+                    }
+                };
+                OnTickButton.OnValueChange += delegate (ValueBase<bool> sender, ValueBase<bool>.ValueChangeArgs args)
+                {
+                    if (args.NewValue)
+                    {
+                        OnUpdateButton.CurrentValue = false;
+                        return;
+                    }
+                    if (!OnUpdateButton.CurrentValue)
+                    {
+                        OnTickButton.CurrentValue = true;
+                    }
+                };
+
                 if (UBAddons.PluginInstance != null)
                 {
                     GapCloser = Core.AddSubMenu("GapCloser", "UBAddons.Core.GapCloser", "General GapCloser");
@@ -61,13 +91,8 @@ namespace UBAddons.UBCore
                             SpotJump.Add("UBAddons.Core." + Player.Instance.Hero + ".Spot.Color", new ColorPicker("Spot Color", ColorReader.Load("UBAddons.Core." + Player.Instance.Hero + ".Spot.Color", System.Drawing.Color.Green)));
                             if (Game.MapId.Equals(GameMapId.SummonersRift) && SpotJump.VChecked("UBAddons.Core." + Player.Instance.Hero + ".Spot"))
                             {
-                                JumpSpot.InitSpots();
+                                UtilityPlugin.AddPlugin(EUtility.JumpSpot);
                             }
-                            EloBuddy.SDK.Core.DelayAction(() =>
-                            {
-                                Game.OnUpdate += JumpSpot.JumpSystem;
-                                Drawing.OnEndScene += Drawing_OnEndScene;
-                            }, 500);
                         }
                     }
                     if (IplayVelkoz)
@@ -99,23 +124,19 @@ namespace UBAddons.UBCore
                 }
                 if (Core.VChecked("Core.Activator"))
                 {
-                    Activator.Main.Initialize();
+                    UtilityPlugin.AddPlugin(EUtility.Activator);
                 }
                 if (Core.VChecked("Core.BaseUlt"))
                 {
-                    BaseUlt.BaseUlt.Initialize();
+                    UtilityPlugin.AddPlugin(EUtility.BaseUlt);
                 }
                 if (Core.VChecked("Core.AutoLv"))
                 {
-                    AutoLv.AutoLv.Initialize();
+                    UtilityPlugin.AddPlugin(EUtility.AutoLv);
                 }
-                //if (Core.VChecked("Core.Surrender"))
-                //{
-                //    Surrender.Surrender.Initialize();
-                //}
                 if (Variables.IsADC && Core.VChecked("Core.Orbwalker"))
                 {
-                    ADOrbwalker.Main.Initialize();
+                    UtilityPlugin.AddPlugin(EUtility.ADOrbwalker);
                 }
             }
             catch (Exception e)
@@ -129,9 +150,6 @@ namespace UBAddons.UBCore
             foreach (var spot in JumpSpot.JumpSpots.Where(s => s[0].IsOnScreen()))
             {
                 spot[0].DrawCircle(SpotJump.VSliderValue("UBAddons.Core.Ekko.Range"), SpotJump["UBAddons.Core.Ekko.Spot.Color"].Cast<ColorPicker>().CurrentValue.ToSharpDX());
-                spot[0].DrawArrow(spot[1], SpotJump["UBAddons.Core.Ekko.Spot.Color"].Cast<ColorPicker>().CurrentValue);
-                //Drawing.DrawCircle(spot[0], SpotJump.VSliderValue("UBAddons.Core.Ekko.Range"),
-                //    SpotJump["UBAddons.Core.Ekko.Spot.Color"].Cast<ColorPicker>().CurrentValue);
             }
         }
 

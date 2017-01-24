@@ -63,7 +63,7 @@ namespace UBAddons.Champions.Zilean
                 AutoMenu = Menu.AddSubMenu("R", "UBAddons.RMenu" + player.Hero, "Settings your R saver below");
                 {
                     string BeginText = Variables.AddonName + "." + Player.Instance.Hero + ".Saver.";
-                    AutoMenu.Add("Enable", new CheckBox("Use R"));
+                    AutoMenu.Add(BeginText + "Enable", new CheckBox("Use R"));
                     AutoMenu.AddSeparator();
                     foreach (var champ in EntityManager.Heroes.Allies)
                     {
@@ -131,10 +131,6 @@ namespace UBAddons.Champions.Zilean
                     MiscMenu.AddGroupLabel("Killsteal settings");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.Q, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "KillSteal");
-                    MiscMenu.AddGroupLabel("Deny Recall settings");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString());
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.W, Misc_Menu_Value.DenyRecall.ToString());
-
                 }
                 #endregion
 
@@ -230,18 +226,6 @@ namespace UBAddons.Champions.Zilean
         protected override void OnUnkillableMinion(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
         {
             return;
-        }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || args.Type != TeleportType.Recall) return;
-            if (MenuValue.Misc.QRecall && Q.IsReady() && Q.IsInRange(sender))
-            {
-                Q.Cast(sender);
-            }
-            if (MenuValue.Misc.WRecall && W.IsReady() && !Q.IsReady())
-            {
-                W.Cast();
-            }
         }
         #endregion
 
@@ -439,11 +423,6 @@ namespace UBAddons.Champions.Zilean
                 public static bool QI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.Interrupter.ToString()); } }
 
                 public static bool WI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.Interrupter.ToString()); } }
-
-                public static bool QRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
-
-                public static bool WRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.DenyRecall.ToString()); } }
-
             }
 
             internal static class Drawings

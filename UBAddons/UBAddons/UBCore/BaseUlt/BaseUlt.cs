@@ -10,11 +10,12 @@ using System.Drawing;
 using System.Linq;
 using UBAddons.General;
 using UBAddons.Libs;
+using UBAddons.Libs.Base;
 using UBAddons.Log;
 
 namespace UBAddons.UBCore.BaseUlt
 {
-    class BaseUlt
+    class BaseUlt : IModuleBase
     {
         internal static Menu BaseMenu;
         public static bool Initialized { get; private set; }
@@ -101,7 +102,6 @@ namespace UBAddons.UBCore.BaseUlt
                                     EnemyList.Add(enemy.NetworkId, new Teleport_Infomation(enemy, false));
                                 }
                             }
-                            Game.OnUpdate += Game_OnUpdate;
                         }
                         else
                         {
@@ -182,7 +182,7 @@ namespace UBAddons.UBCore.BaseUlt
             TextureDraw.Draw(Teleporting);
         }
 
-        private static void Game_OnUpdate(EventArgs args)
+        private static void Game_OnUpdate()
         {
             foreach (var info in EnemyList.Where(e => e.Value.Enemy.IsHPBarRendered && !e.Value.Enemy.IsDead))
             {
@@ -299,7 +299,23 @@ namespace UBAddons.UBCore.BaseUlt
             }
             return Core.GameTickCount - info?.Lastseen <= timelimit * 1000;
         }
-        public static void Initialize()
+
+        public bool ShouldExecuted()
+        {
+            return true;
+        }
+
+        public void OnLoad()
+        {
+            Initialize();
+        }
+
+        public void Execute()
+        {
+            Game_OnUpdate();
+        }
+
+        private static void Initialize()
         {
             if (Initialized)
             {

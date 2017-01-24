@@ -162,8 +162,6 @@ namespace UBAddons.Champions.Amumu
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.E, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.R, "KillSteal");
-                    MiscMenu.AddGroupLabel("Deny Recall settings");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString(), false);
                 }
                 #endregion
 
@@ -242,14 +240,6 @@ namespace UBAddons.Champions.Amumu
                 {
                     E.Cast();
                 }
-            }
-        }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || args.Type != TeleportType.Recall) return;
-            if (MenuValue.Misc.QRecall && Q.IsReady() && Q.IsInRange(sender))
-            {
-                Q.Cast(sender);
             }
         }
         #endregion
@@ -508,8 +498,6 @@ namespace UBAddons.Champions.Amumu
                 public static DangerLevel[] DangerValue { get { return MiscMenu.GetDangerValue(); } }
 
                 public static bool QI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.Interrupter.ToString()); } }
-
-                public static bool QRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
 
             }
 

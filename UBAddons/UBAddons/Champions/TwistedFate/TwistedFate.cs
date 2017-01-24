@@ -49,7 +49,7 @@ namespace UBAddons.Champions.TwistedFate
                 AllowedCollisionCount = int.MaxValue,
             };
 
-            W = new Spell.Active(SpellSlot.W, (uint)player.GetAutoAttackRange() + 200);
+            W = new Spell.Active(SpellSlot.W, (uint)player.AttackRange + 250);
 
             R = new Spell.Skillshot(SpellSlot.R, 5500, SkillShotType.Circular, 1500, int.MaxValue, (int)player.BoundingRadius + 30, DamageType.Mixed);
 
@@ -213,8 +213,6 @@ namespace UBAddons.Champions.TwistedFate
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "Interrupter");
                     MiscMenu.AddGroupLabel("Killsteal settings");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.Q, "KillSteal");
-                    MiscMenu.AddGroupLabel("Deny Recall settings");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString());
                 }
                 #endregion
 
@@ -278,14 +276,6 @@ namespace UBAddons.Champions.TwistedFate
                 if (predHealth < float.Epsilon) return;
                 Q.Cast(target);
             }            
-        }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            if (sender == null || !sender.IsEnemy || !sender.IsValid || args.Type != TeleportType.Recall) return;
-            if (MenuValue.Misc.QRecall && Q.IsReady() && Q.IsInRange(sender))
-            {
-                Q.Cast(sender);
-            }
         }
         #endregion
 
@@ -402,7 +392,6 @@ namespace UBAddons.Champions.TwistedFate
         internal static void LogicPickedCard(bool use, int Logic)
         {
             if (!W.IsReady() || !use) return;
-            var target = Orbwalker.LastTarget;
             var WTar = W.GetTarget();
             if (WTar != null) return;
             {
@@ -410,17 +399,17 @@ namespace UBAddons.Champions.TwistedFate
                 {
                     case 0:
                         {
-                            if (Orbwalker.ActiveModes.Combo.IsOrb())
+                            if (Orbwalker.ActiveModes.Combo.IsOrb() || Orbwalker.ActiveModes.Harass.IsOrb())
                             {
                                 if (MenuValue.General.ShouldBlue)
                                 {
                                     Pick(CardType.Blue);
                                 }
-                                if (target != null && target.CountEnemyHeroesInRangeWithPrediction(200, 450) >= MenuValue.General.RedHit)
+                                else if (WTar.CountEnemyHeroesInRangeWithPrediction(180, 450) >= MenuValue.General.RedHit)
                                 {
                                     Pick(CardType.Red);
                                 }
-                                if (W.GetTarget() != null)
+                                else
                                 {
                                     Pick(CardType.Yellow);
                                 }
@@ -431,11 +420,11 @@ namespace UBAddons.Champions.TwistedFate
                                 {
                                     Pick(CardType.Blue);
                                 }
-                                if (target != null && target.CountEnemyMinionsInRangeWithPrediction(200, 450) >= MenuValue.General.RedHit)
+                                else if (WTar != null && WTar.CountEnemyMinionsInRangeWithPrediction(200, 450) >= MenuValue.General.RedHit)
                                 {
                                     Pick(CardType.Red);
                                 }
-                                if (EntityManager.MinionsAndMonsters.Monsters.Count(x => x.IsValid && x.IsInRange(player, player.GetAutoAttackRange() + 200)) >= MenuValue.General.RedHit)
+                                else if (EntityManager.MinionsAndMonsters.Monsters.Count(x => x.IsValid && x.IsInRange(player, player.GetAutoAttackRange() + 200)) >= MenuValue.General.RedHit)
                                 {
                                     Pick(CardType.Red);
                                 }
@@ -553,9 +542,6 @@ namespace UBAddons.Champions.TwistedFate
                 public static DangerLevel[] dangerValue { get { return MiscMenu.GetDangerValue(); } }
 
                 public static bool WI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.Interrupter.ToString()); } }
-
-                public static bool QRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
-
             }
 
             internal static class Drawings

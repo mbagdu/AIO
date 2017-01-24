@@ -25,7 +25,7 @@ namespace UBAddons.Champions.Ekko.Modes
             {
                 var Target = TargetSelector.GetTarget(
                     EntityManager.Heroes.Enemies.Where(t => t != null
-                        && t.IsValid
+                        && t.IsValidTarget()
                         && !t.HasUndyingBuff(true)
                         && !t.HasBuffOfType(BuffType.SpellImmunity)
                         && t.IsInRange(player, Q.Range + E.Range)
@@ -41,7 +41,7 @@ namespace UBAddons.Champions.Ekko.Modes
                 {
                     var Target = TargetSelector.GetTarget(
                         EntityManager.Heroes.Enemies.Where(t => t != null
-                            && t.IsValid
+                            && t.IsValidTarget()
                             && !t.HasUndyingBuff(true)
                             && !t.HasBuffOfType(BuffType.SpellImmunity)
                             && t.IsInRange(Ekko_Kage_Bunshin, R.Range)

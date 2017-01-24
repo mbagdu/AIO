@@ -3,6 +3,7 @@ using EloBuddy.SDK;
 using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Events;
 using System;
+using UBAddons.Libs;
 using UBAddons.Libs.Base;
 using UBAddons.Log;
 using UBAddons.General;
@@ -14,9 +15,9 @@ namespace UBAddons
         static void Main(string[] args)
         {
             Loading.OnLoadingComplete += Loading_OnLoadingComplete;
-            //UpdateChecker.CheckForUpdates();
-            //while (UpdateChecker.CurrentVersion == System.Version.Parse("0.0.0.0"))
-            //{ }
+            UpdateChecker.CheckForUpdates();
+            while (UpdateChecker.CurrentVersion == System.Version.Parse("0.0.0.0"))
+            { }
         }
         internal static IHeroBase PluginInstance { get; private set; }
         private static void Loading_OnLoadingComplete(System.EventArgs args)
@@ -48,7 +49,20 @@ namespace UBAddons
 
             PluginInstance = (IHeroBase)Activator.CreateInstance(type);
             Libs.Dictionary.FleeSpell.Initialize();
-            Core.DelayAction(() => Initialize(PluginInstance), 100);
+            ShowNotification();
+            Core.DelayAction(() =>
+            {
+                Initialize(PluginInstance);
+                UtilityPlugin.OnLoad();
+                if (UBCore.CoreMenu.UseOnTick)
+                {
+                    Game.OnTick += UtilityPlugin.OnUpdate;
+                }
+                if (UBCore.CoreMenu.UseOnUpdate)
+                {
+                    Game.OnUpdate += UtilityPlugin.OnUpdate;
+                }
+            }, 200);
         }
         private static void Initialize(IHeroBase addonbase)
         {
@@ -56,9 +70,15 @@ namespace UBAddons
             Interrupter.OnInterruptableSpell += addonbase.OnInterruptable;
             Orbwalker.OnUnkillableMinion += addonbase.OnUnkillableMinion;
             Gapcloser.OnGapcloser += addonbase.OnGapcloser;
-            Teleport.OnTeleport += addonbase.OnTeleport;
             Drawing.OnDraw += addonbase.OnDraw;
-            Game.OnTick += addonbase.OnTick;
+            if (UBCore.CoreMenu.UseOnTick)
+            {
+                Game.OnTick += addonbase.OnTick;
+            }
+            if (UBCore.CoreMenu.UseOnUpdate)
+            {
+                Game.OnUpdate += addonbase.OnTick;
+            }
         }
         private static void ShowNotification()
         {
@@ -73,13 +93,13 @@ namespace UBAddons
             {
                 Chat.Print("<font = 'Comic Sans MS'>This is newest version: " + CurrentVersion + "</font>", System.Drawing.Color.LightGreen);
                 UBNotification.ShowNotif("UBAddons Notification", "This is newest version: " + CurrentVersion, "update");
-                Debug.Print("This is newest version: " + CurrentVersion, Console_Message.Outdate);
+                Debug.Print("This is newest version: " + CurrentVersion, Console_Message.Notifications);
             }
             if (CurrentVersion < typeof(UBAddons).Assembly.GetName().Version)
             {
                 Chat.Print("Thanks for helping me", System.Drawing.Color.LightGreen);
                 UBNotification.ShowNotif("UBAddons Notification", "Thanks for helping me <3", "update");
-                Debug.Print("Thanks for helping me <3", Console_Message.Outdate);
+                Debug.Print("Thanks for helping me <3", Console_Message.Notifications);
             }
         }
     }

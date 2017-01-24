@@ -159,9 +159,6 @@ namespace UBAddons.Champions.Ahri
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.E, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.R, "KillSteal");
-                    MiscMenu.AddGroupLabel("Deny Recall settings");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString());
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.E, Misc_Menu_Value.DenyRecall.ToString());
                 }
                 #endregion
 
@@ -340,18 +337,6 @@ namespace UBAddons.Champions.Ahri
                 var predHealth = E.GetHealthPrediction(target);
                 if (predHealth < float.Epsilon) return;
                 E.Cast(target);
-            }
-        }
-        protected override void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            if (sender == null || !sender.IsEnemy || !sender.IsValid || args.Type != TeleportType.Recall) return;
-            if (MenuValue.Misc.QRecall && Q.IsReady())
-            {
-                Q.Cast(sender);
-            }
-            else if (MenuValue.Misc.ERecall && E.IsReady())
-            {
-                E.Cast(sender);
             }
         }
         #endregion
@@ -639,10 +624,6 @@ namespace UBAddons.Champions.Ahri
                 public static DangerLevel[] dangerValue { get { return MiscMenu.GetDangerValue(); } }
 
                 public static bool EI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.E, Misc_Menu_Value.Interrupter.ToString()); } }
-
-                public static bool QRecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.DenyRecall.ToString()); } }
-
-                public static bool ERecall { get { return MiscMenu.GetSlotCheckBox(SpellSlot.E, Misc_Menu_Value.DenyRecall.ToString()); } }
 
             }
 

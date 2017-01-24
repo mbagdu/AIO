@@ -10,11 +10,12 @@ using System.Drawing;
 using System.Linq;
 using UBAddons.General;
 using UBAddons.Libs;
+using UBAddons.Libs.Base;
 using UBAddons.Log;
 
 namespace UBAddons.UBCore.ADOrbwalker
 {
-    class Main
+    class Main : IModuleBase
     {
         internal static Menu OrbMenu;
         public static bool Initialized { get; private set; }
@@ -41,7 +42,6 @@ namespace UBAddons.UBCore.ADOrbwalker
                         OrbMenu.Add("MyHP", new Slider("Enable if My HP below {0}", 20));
                         OrbMenu.Add("MoreAttack", new Slider("Don't do this if enemy can kill with {0} attack more", 4, 1, 10));
                     }
-                    Game.OnUpdate += Force;
                 }
                 catch (Exception e)
                 {
@@ -49,7 +49,7 @@ namespace UBAddons.UBCore.ADOrbwalker
                 }
             }
         }
-        internal static void Force(EventArgs args)
+        internal static void Force()
         {
             if (Player.Instance.PercentPhysicalLifeStealMod() < OrbMenu.VSliderValue("LifeSteal") || Player.Instance.FlatCritChanceMod * 100 < OrbMenu.VSliderValue("CritChance")
                 || !Orbwalker.ActiveModes.Combo.IsOrb() || !Orbwalker.LaneClearMinionsList.Any() || Player.Instance.HealthPercent > OrbMenu.VSliderValue("MyHP") || Orbwalker.GetTarget() == null)
@@ -65,6 +65,22 @@ namespace UBAddons.UBCore.ADOrbwalker
             }
             Orbwalker.ForcedTarget = Orbwalker.LaneClearMinionsList.FirstOrDefault(x => x.IsValidTarget(Player.Instance.GetAutoAttackRange(x)) && !x.IsInvulnerable);
         }
+
+        public bool ShouldExecuted()
+        {
+            return Variables.IsADC;
+        }
+
+        public void OnLoad()
+        {
+            Initialize();
+        }
+
+        public void Execute()
+        {
+            Force();
+        }
+
         public static void Initialize()
         {
             if (Initialized)
@@ -73,6 +89,5 @@ namespace UBAddons.UBCore.ADOrbwalker
             }
             Initialized = true;
         }
-
     }
 }

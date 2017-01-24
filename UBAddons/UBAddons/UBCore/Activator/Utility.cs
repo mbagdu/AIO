@@ -279,7 +279,7 @@ namespace UBAddons.UBCore.Activator
         }
         internal static void ChangeTrinket()
         {
-            if (Main.UtilityMenu.VComboValue("Trinket" + Player.Instance.ChampionName).Equals(0) || Player.Instance.Level < 9
+            if (Main.Activator == null || Main.UtilityMenu.VComboValue("Trinket" + Player.Instance.ChampionName).Equals(0) || Player.Instance.Level < 9
                 || !Player.Instance.IsInShopRange() || Bought || !Shop.CanShop || !Game.MapId.Equals(GameMapId.SummonersRift)) return;
             switch (Main.UtilityMenu.VComboValue("Trinket" + Player.Instance.ChampionName))
             {

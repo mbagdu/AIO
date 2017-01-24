@@ -12,7 +12,6 @@ namespace UBAddons.Libs.Base
         void OnDraw(EventArgs args);
         void OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs args);
         void OnInterruptable(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs args);
-        void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args);
         void OnUnkillableMinion(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args);
         bool EnableDraw { get; }
         bool EnableDamageIndicator { get; }

@@ -10,7 +10,6 @@ namespace UBAddons.Libs
 {
     public abstract class ChampionPlugin : IHeroBase
     {
-        private static int LastTick, Delay, LastTickdelay;
         /// <summary>
         /// Creat the Menu
         /// </summary>
@@ -40,19 +39,12 @@ namespace UBAddons.Libs
         /// </summary>
         /// <param name="args">EventArgs</param>
         void IHeroBase.OnTick(EventArgs args)
-        {
-            if (Core.GameTickCount - LastTick >= 1000)
-            {
-                LastTick = Core.GameTickCount;
-            }
-            Delay += Core.GameTickCount - LastTickdelay;
-            LastTickdelay = Core.GameTickCount;
-
-            if (!CheckFps())
+        {            
+            if (!FPS_Protect.CheckFps())
             {
                 return;
             }
-        
+
             PermaActive();
 
             if (Orbwalker.ActiveModes.Combo.IsOrb())
@@ -114,24 +106,6 @@ namespace UBAddons.Libs
                 Debug.Print(e.ToString(), Console_Message.Error);
             }
         }
-
-        /// <summary>
-        /// Recall feature
-        /// </summary>
-        /// <param name="sender">Who is recalling/Teleporting</param>
-        /// <param name="args">EventArgs</param>
-        void IHeroBase.OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args)
-        {
-            try
-            {
-                OnTeleport(sender, args);
-            }
-            catch (Exception e)
-            {
-                Debug.Print(e.ToString(), Console_Message.Error);
-            }
-        }
-
         /// <summary>
         /// Calcalute Unkillable Minion
         /// </summary>
@@ -176,30 +150,11 @@ namespace UBAddons.Libs
         protected abstract void OnDraw(EventArgs args);
         protected abstract void OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs args);
         protected abstract void OnInterruptable(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs args);
-        protected abstract void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args);
+        //protected abstract void OnTeleport(Obj_AI_Base sender, Teleport.TeleportEventArgs args);
         protected abstract void OnUnkillableMinion(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args);
         protected abstract bool EnableDraw { get; }
         protected abstract bool EnableDamageIndicator { get; }
-        protected abstract bool IsAutoHarass { get; }
-
-        public bool CheckFps()
-        {
-            if (!UBCore.CoreMenu.Core.VChecked("Core.Enable.FPS"))
-            {
-                return true;
-            }
-            var rate = UBCore.CoreMenu.Core.VSliderValue("Core.Calculate");
-            if (Game.FPS < UBCore.CoreMenu.Core.VSliderValue("Core.Min.FPS"))
-            {
-                rate = Math.Min(10, UBCore.CoreMenu.Core.VSliderValue("Core.Calculate"));
-            }
-            if (Delay > 1000f / rate)
-            {
-                Delay = 0;
-                return true;
-            }
-            return false;
-        }
+        protected abstract bool IsAutoHarass { get; }        
 
     }
 }
