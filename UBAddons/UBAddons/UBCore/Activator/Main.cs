@@ -133,7 +133,6 @@ namespace UBAddons.UBCore.Activator
                             Clean.Add("Cleanse." + BuffType.Disarm, new CheckBox("Use On Disarm", false));
                             Clean.Add("Cleanse." + BuffType.Fear, new CheckBox("Use On Fear"));
                             Clean.Add("Cleanse." + BuffType.Flee, new CheckBox("Use On Flee"));
-                            Clean.Add("Cleanse." + BuffType.Frenzy, new CheckBox("Use On Frenzy", false));
                             Clean.Add("Cleanse." + BuffType.Knockback, new CheckBox("Use On Knockback"));
                             Clean.Add("Cleanse." + BuffType.Knockup, new CheckBox("Use On Knockup"));
                             Clean.Add("Cleanse." + BuffType.NearSight, new CheckBox("Use On NearSight", false));
@@ -669,7 +668,6 @@ namespace UBAddons.UBCore.Activator
                                             Clean.Add("QSS." + BuffType.Disarm, new CheckBox("Use On Disarm", false));
                                             Clean.Add("QSS." + BuffType.Fear, new CheckBox("Use On Fear"));
                                             Clean.Add("QSS." + BuffType.Flee, new CheckBox("Use On Flee"));
-                                            Clean.Add("QSS." + BuffType.Frenzy, new CheckBox("Use On Frenzy", false));
                                             Clean.Add("QSS." + BuffType.Knockback, new CheckBox("Use On Knockback"));
                                             Clean.Add("QSS." + BuffType.Knockup, new CheckBox("Use On Knockup"));
                                             Clean.Add("QSS." + BuffType.NearSight, new CheckBox("Use On NearSight", false));
@@ -739,7 +737,6 @@ namespace UBAddons.UBCore.Activator
                                             Clean.Add("Mikaels_Crucible." + BuffType.Disarm, new CheckBox("Use On Disarm", false));
                                             Clean.Add("Mikaels_Crucible." + BuffType.Fear, new CheckBox("Use On Fear"));
                                             Clean.Add("Mikaels_Crucible." + BuffType.Flee, new CheckBox("Use On Flee"));
-                                            Clean.Add("Mikaels_Crucible." + BuffType.Frenzy, new CheckBox("Use On Frenzy", false));
                                             Clean.Add("Mikaels_Crucible." + BuffType.Knockback, new CheckBox("Use On Knockback"));
                                             Clean.Add("Mikaels_Crucible." + BuffType.Knockup, new CheckBox("Use On Knockup"));
                                             Clean.Add("Mikaels_Crucible." + BuffType.NearSight, new CheckBox("Use On NearSight", false));
