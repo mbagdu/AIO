@@ -39,18 +39,21 @@ namespace UBAddons.Champions.Alistar
 
             W = new Spell.Targeted(SpellSlot.W, 650, DamageType.Magical);
 
-            E = new Spell.Active(SpellSlot.E, 300, DamageType.Magical);
+            E = new Spell.Active(SpellSlot.E, 365, DamageType.Magical);
 
             R = new Spell.Active(SpellSlot.R);
 
             DamageIndicator.DamageDelegate = HandleDamageIndicator;
             Obj_AI_Base.OnBasicAttack += delegate (Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
             {
-                var turret = sender as Obj_AI_Turret;
-                if (turret == null) return;
-                if (args.Target.IsMe && MenuValue.General.TurretHit && R.IsReady())
+                if (sender is Obj_AI_Turret)
                 {
-                    R.Cast();
+                    var turret = sender as Obj_AI_Turret;
+                    if (turret == null) return;
+                    if (args.Target.IsMe && MenuValue.General.TurretHit && R.IsReady())
+                    {
+                        R.Cast();
+                    }
                 }
             };
         }
@@ -357,11 +360,11 @@ namespace UBAddons.Champions.Alistar
             {
                 Q.DrawRange(MenuValue.Drawings.ColorQ);
             }
-            if (MenuValue.Drawings.DrawW && (MenuValue.Drawings.ReadyW) || W.IsReady())
+            if (MenuValue.Drawings.DrawW && (!MenuValue.Drawings.ReadyW || W.IsReady()))
             {
                 W.DrawRange(MenuValue.Drawings.ColorW);
             }
-            if (MenuValue.Drawings.DrawE && (MenuValue.Drawings.ReadyE) || E.IsReady())
+            if (MenuValue.Drawings.DrawE && (!MenuValue.Drawings.ReadyE || E.IsReady()))
             {
                 E.DrawRange(MenuValue.Drawings.ColorE);
             }

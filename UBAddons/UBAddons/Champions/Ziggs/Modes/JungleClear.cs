@@ -1,4 +1,5 @@
-﻿using EloBuddy.SDK;
+﻿using EloBuddy;
+using EloBuddy.SDK;
 using System.Linq;
 using UBAddons.Libs;
 
@@ -22,7 +23,10 @@ namespace UBAddons.Champions.Ziggs.Modes
                 var mob = W.GetJungleMobs();
                 if (mob.Any())
                 {
-                    W.Cast(mob.First());
+                    if (W.Cast(mob.First()))
+                    {
+                        Core.DelayAction(() => Player.CastSpell(SpellSlot.W), W.CastDelay + (int)player.Distance(mob.First().Position) / W.Speed);
+                    }
                 }
             }
             if (MenuValue.JungleClear.UseE && E.IsReady())

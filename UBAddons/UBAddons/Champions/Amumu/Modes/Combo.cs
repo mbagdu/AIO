@@ -11,7 +11,7 @@ namespace UBAddons.Champions.Amumu.Modes
             var Champ = EntityManager.Heroes.Enemies.Where(x => x.Health < HandleDamageIndicator(x));
             if (MenuValue.Combo.UseQ && Q.IsReady())
             {
-                var target = Q.GetTarget(Champ);
+                var target = Q.GetGapcloseTarget(300);
                 if (target != null)
                 {
                     var pred = Q.GetPrediction(target);

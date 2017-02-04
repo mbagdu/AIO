@@ -254,7 +254,7 @@ namespace UBAddons.UBCore.AutoLv
 
         public bool ShouldExecuted()
         {
-            return LvMenu.VChecked("Enable") && !Player.Instance.SpellTrainingPoints.Equals(0);                 
+            return true;                 
         }
 
         public void Execute()

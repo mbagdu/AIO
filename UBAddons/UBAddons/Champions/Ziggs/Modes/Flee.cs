@@ -17,7 +17,7 @@ namespace UBAddons.Champions.Ziggs.Modes
             {
                 if (W.Cast(destination.Extend(player.Position, destination.Distance(player) + 20).To3DWorld()))
                 {
-                    Core.DelayAction(() => Player.CastSpell(SpellSlot.W), 250);
+                    Core.DelayAction(() => Player.CastSpell(SpellSlot.W), 300);
                 }
             }
         }

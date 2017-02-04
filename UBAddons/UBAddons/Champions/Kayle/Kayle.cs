@@ -91,7 +91,7 @@ namespace UBAddons.Champions.Kayle
                 #region R
                 RMenu = Menu.AddSubMenu("R", "UBAddons.RMenu" + player.Hero, "Settings your R saver below");
                 {
-                    string BeginText = Variables.AddonName + "." + Player.Instance.Hero + ".R.";
+                    string BeginText = Variables.AddonName + "." + Player.Instance.Hero + ".Saver.";
                     RMenu.Add(BeginText + "Enable", new CheckBox("Use R"));
                     RMenu.AddSeparator();
                     foreach (var champ in EntityManager.Heroes.Allies)
@@ -100,7 +100,7 @@ namespace UBAddons.Champions.Kayle
                         RMenu.Add(BeginText + "Enable." + champ.Hero, new CheckBox("Use on " + champ.ChampionName));
                         if (champ.IsMe)
                         {
-                            RMenu.Add(Variables.AddonName + ".Kayle.R.Turret", new CheckBox("R when turret hit me"));
+                            RMenu.Add(Variables.AddonName + ".Kayle.Saver.Turret", new CheckBox("R when turret hit me"));
                         }
                         RMenu.Add(BeginText + "HP." + champ.Hero, new Slider("Use R if " + champ.ChampionName + "'s HP below {0}%", 20, 0, 100));
                         RMenu.Add(BeginText + "Spell.Damage." + champ.Hero, new Slider("R if enemy spell damage more than", 500, 300, 3000));
@@ -387,11 +387,11 @@ namespace UBAddons.Champions.Kayle
 
             internal static class Auto
             {
-                static string BeginText = Variables.AddonName + "." + Player.Instance.Hero + ".R.";
+                static string BeginText = Variables.AddonName + "." + Player.Instance.Hero + ".Saver.";
 
                 public static bool Enable { get { return RMenu.VChecked(BeginText + "Enable"); } }
 
-                public static bool TurretHit { get { return RMenu.VChecked("UBAddons.Kayle.R.Turret"); } }
+                public static bool TurretHit { get { return RMenu.VChecked("UBAddons.Kayle.Saver.Turret"); } }
 
                 public static bool EnableWith(AIHeroClient champ) { return RMenu.VChecked(BeginText + "Enable." + champ.Hero); }
 

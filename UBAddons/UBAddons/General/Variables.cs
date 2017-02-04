@@ -73,14 +73,14 @@ namespace UBAddons.General
             {
                 if (SandboxConfig.IsBuddy)
                 {
-                    string[] Designer = new string[] { "Lil Budd Bazy", "PSDmum", "Qyrie", "rottenentrailz", "Useless" };
-                    string[] Contributor = new string[] { "Chaos", "Counter", "DamnedNooB", "DanThePman", "DarkNite", "Enelx", "goldfinsh", "MeLoSenpai",
-                        "Mercedes7", "Rethought", "Taazuma", "Uzumaki Boruto", "wladi0" };
-                    string[] AddonDev = new string[] { "Aka", "Berb", "Toyota7", "KarmaPanda", "gero", };
+                    string[] Designer = new string[] { "Lil Budd Bazy", "PSDmum", "Qyrie", "rottenentrailz", "Useless", };
+                    string[] Contributor = new string[] { "Counter", "DamnedNooB", "DanThePman", "DarkNite", "Enelx", "goldfinsh",
+                        "Mercedes7", "Sebby", "Taazuma", "Uzumaki Boruto", "wladi0", };
+                    string[] AddonDev = new string[] { "Aka", "Berb", "Chaos", "gero", "KarmaPanda", "MeLoSenpai", "MrArticuno", "Toyota7", };
                     string[] Dev = new string[] { "lostit", "stefsot", };
-                    string[] Sp = new string[] { "Astratt", "jitko", "Reincarnation", };
-                    string[] ComSp = new string[] { "0xpop", "Haxory", "Janney", "Ouija", "Paona", "Sadlysius", "Support", "test", };
-                    string[] Mod = new string[] { "Acheiropoiesis", "Yuuki", };
+                    string[] Sp = new string[] { "rivurrb", "Rize", "TrueLove", };
+                    string[] ComSp = new string[] { "0xpop", "Haxory", "Janney", "Jitko", "Paona", "Sadlysius", "Support", "test", };
+                    string[] Mod = new string[] { "Yuuki", };
                     string[] Admin = new string[] { "finndev", "Tony", "JokerArt", };
                     if (Designer.Contains(SandboxConfig.Username))
                     {

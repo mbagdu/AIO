@@ -389,7 +389,7 @@ namespace UBAddons.UBCore.AutoLv
                     return new[] { W, Q, E, W, W, R, W, E, W, E, R, E, E, Q, Q, R, Q, Q }.ToList();
 
                 case Champion.Warwick:
-                    return new[] { Q, W, E, Q, Q, R, Q, W, Q, W, R, W, W, E, E, R, E, E }.ToList();
+                    return new[] { Q, E, W, Q, Q, R, Q, E, Q, E, R, E, E, W, W, R, W, W }.ToList();
 
                 case Champion.MonkeyKing:
                     return new[] { E, Q, W, Q, Q, R, E, Q, E, Q, R, E, E, W, W, R, W, W }.ToList();
@@ -423,7 +423,7 @@ namespace UBAddons.UBCore.AutoLv
 
                 default:
                     {
-                        Log.Debug.Print($"There's no data for {Player.Instance.ChampionName}, pls report to Uzumaki Boruto", General.Console_Message.Notifications);
+                        Log.Debug.Print($"There's no data for {Player.Instance.ChampionName}, please report to Uzumaki Boruto", General.Console_Message.Notifications);
                         Log.UBNotification.ShowNotif("Auto Level Up", $"There's no data for {Player.Instance.ChampionName}", "blue", 2000);
                         var skill = new List<SpellSlot>();
                         for (int i = 1; i <= 18; i++)

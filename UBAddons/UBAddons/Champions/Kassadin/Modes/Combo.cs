@@ -29,10 +29,10 @@ namespace UBAddons.Champions.Kassadin.Modes
                     }
                 }
             }
-            if (MenuValue.Combo.UseR && player.HealthPercent > MenuValue.Combo.MyHP && R.IsReady())
+            if (MenuValue.Combo.UseR && R.IsReady())
             {
-                var target = R.GetTarget(Champ);
-                if (target != null && target.HealthPercent <= MenuValue.Combo.EnemyHP)
+                var target = R.GetGapcloseTarget(300);
+                if (target != null)
                 {
                     var pred = R.GetPrediction(target);
                     if (pred.CanNext(R, MenuValue.General.EHitChance, true))

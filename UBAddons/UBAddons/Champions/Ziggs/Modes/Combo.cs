@@ -11,6 +11,7 @@ namespace UBAddons.Champions.Ziggs.Modes
         public static void Execute()
         {
             var Champ = EntityManager.Heroes.Enemies.Where(x => x.Health < HandleDamageIndicator(x));
+            if (MenuValue.Combo.PassiveLogic == 1 && player.HasBuff("ZiggsShortFuse") || (MenuValue.Combo.PassiveLogic == 2 && player.HasBuff("ZiggsShortFuse") && Orbwalker.GetTarget() != null)) return;
             if (MenuValue.Combo.UseQ && Q.IsReady())
             {
                 var target = Q3.GetTarget(Champ);
@@ -29,7 +30,7 @@ namespace UBAddons.Champions.Ziggs.Modes
                     {
                         if (W.Cast(pred.CastPosition))
                         {
-                            Core.DelayAction(() => Player.CastSpell(SpellSlot.W), W.CastDelay + (int)player.Distance(pred.CastPosition) / W.Speed);
+                            Core.DelayAction(() => Player.CastSpell(SpellSlot.W), W.CastDelay + 1 + (int)player.Distance(pred.CastPosition) / W.Speed);
                         }
                     }
                 }

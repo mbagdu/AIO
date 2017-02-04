@@ -33,15 +33,17 @@ namespace UBAddons.Champions.Zilean.Modes
             }
             {
                 var target = Q.GetKillableTarget();
-                if (target == null) return;
-                if (Q.IsReady() && MenuValue.Misc.QKS)
+                if (target != null)
                 {
-                    var pred = Q.GetPrediction(target);
-                    Q.Cast(pred.CastPosition);
-                }
-                if (W.IsReady() && !Q.IsReady() && MenuValue.Misc.WKS)
-                {
-                    W.Cast();
+                    if (Q.IsReady() && MenuValue.Misc.QKS)
+                    {
+                        var pred = Q.GetPrediction(target);
+                        Q.Cast(pred.CastPosition);
+                    }
+                    if (W.IsReady() && !Q.IsReady() && MenuValue.Misc.WKS)
+                    {
+                        W.Cast();
+                    }
                 }
             }
         }

@@ -44,8 +44,14 @@ namespace UBAddons.Champions.Ziggs
             {
                 AllowedCollisionCount = int.MaxValue,
             };
-            Q2 = new Spell.Skillshot(SpellSlot.Q, 1125, SkillShotType.Linear, 50 + Q.CastDelay, Q.Speed, Q.Width, DamageType.Magical);
-            Q3 = new Spell.Skillshot(SpellSlot.Q, 1400, SkillShotType.Linear, 100 + Q.CastDelay, Q.Speed, Q.Width, DamageType.Magical);
+            Q2 = new Spell.Skillshot(SpellSlot.Q, 1125, SkillShotType.Circular, 500 + Q.CastDelay, Q.Speed, Q.Width, DamageType.Magical)
+            {
+                AllowedCollisionCount = int.MaxValue,
+            };
+            Q3 = new Spell.Skillshot(SpellSlot.Q, 1400, SkillShotType.Circular, 600 + Q.CastDelay, Q.Speed, Q.Width, DamageType.Magical)
+            {
+                AllowedCollisionCount = int.MaxValue,
+            };
             W = new Spell.Skillshot(SpellSlot.W, DamageType.Magical)
             {
                 AllowedCollisionCount = int.MaxValue,
@@ -102,6 +108,7 @@ namespace UBAddons.Champions.Ziggs
                 #region Combo
                 ComboMenu = Menu.AddSubMenu("Combo", "UBAddons.ComboMenu" + player.Hero, "UB" + player.Hero + " - Settings your combo below");
                 {
+                    ComboMenu.Add("UBAddons.Ziggs.Passive.Combo", new ComboBox("Prevent spell if has Passive", 2, "Never", "Always", "Only has target in AA range"));
                     ComboMenu.CreatSlotCheckBox(SpellSlot.Q);
                     ComboMenu.CreatSlotCheckBox(SpellSlot.W);
                     ComboMenu.CreatSlotCheckBox(SpellSlot.E);
@@ -217,7 +224,10 @@ namespace UBAddons.Champions.Ziggs
                 if (pred.CanNext(Q2, MenuValue.General.QHitChance, false))
                 {
                     var castPosition = player.Position.Extend(pred.CastPosition, player.Distance(pred.CastPosition) * QBounceRatio2).To3DWorld();
-                    return Q.Cast(castPosition);
+                    if (castPosition.CountEnemyMinionsInRange(Q.Radius) < float.Epsilon && !castPosition.IsWall() && !castPosition.IsBuilding())
+                    {
+                        return Q.Cast(castPosition);
+                    }
                 }
             }
             return false;
@@ -238,7 +248,14 @@ namespace UBAddons.Champions.Ziggs
                 if (pred.CanNext(Q3, MenuValue.General.QHitChance, false))
                 {
                     var castPosition = player.Position.Extend(pred.CastPosition, player.Distance(pred.CastPosition) * QBounceRatio3).To3DWorld();
-                    return Q.Cast(castPosition);
+                    var castPosition2 = player.Position.Extend(pred.CastPosition, player.Distance(pred.CastPosition) / QBounceRatio2);
+                    if (castPosition2.CountEnemyMinionsInRange(Q.Radius) < float.Epsilon && !castPosition.IsWall() && !castPosition.IsBuilding())
+                    {
+                        if (castPosition.CountEnemyMinionsInRange(Q.Radius) < float.Epsilon && !castPosition.IsWall() && !castPosition.IsBuilding())
+                        {
+                            return Q.Cast(castPosition);
+                        }
+                    }
                 }
             }
             return false;
@@ -250,7 +267,7 @@ namespace UBAddons.Champions.Ziggs
             {
                 if (W.Cast(player.Position.Extend(args.End, 150).To3DWorld()))
                 {
-                    Core.DelayAction(() => Player.CastSpell(SpellSlot.W), 250);
+                    Core.DelayAction(() => Player.CastSpell(SpellSlot.W), 300);
                 }
             }
         }
@@ -462,6 +479,8 @@ namespace UBAddons.Champions.Ziggs
             }
             internal static class Combo
             {
+                public static int PassiveLogic => ComboMenu.VComboValue("UBAddons.Ziggs.Passive.Combo");
+
                 public static bool UseQ { get { return ComboMenu.GetSlotCheckBox(SpellSlot.Q); } }
 
                 public static bool UseW { get { return ComboMenu.GetSlotCheckBox(SpellSlot.W); } }

@@ -45,18 +45,31 @@ namespace UBAddons.Libs
         {
             get
             {
-                if (MainMenu.MenuInstances.Any(x => x.Value.Any(y => y.UniqueMenuId.Equals("UBAddon.MainMenuViktor"))))
-                {
-                    return MainMenu.MenuInstances.Values.FirstOrDefault(x => x.Any(y => y.UniqueMenuId.Equals("UBAddon.MainMenuViktor"))).FirstOrDefault();
-                }
-                return null;
+                return Champions.Viktor.Viktor.Menu;
             }
         }
         private static Spell.Skillshot W;
-        private static bool UseOnCC => Menu.VChecked("UBAddons.Viktor.W.CC");
-        private static bool UseOnTelePort => Menu.VChecked("UBAddons.Viktor.W.Teleport");
-        private static bool UseOnRevive => Menu.VChecked("UBAddons.Viktor.W.Revive");
-
+        private static bool UseOnCC
+        {
+            get
+            {
+                return Menu.VChecked("UBAddons.Viktor.W.CC");
+            }
+        }
+        private static bool UseOnTelePort
+        {
+            get
+            {
+                return Menu.VChecked("UBAddons.Viktor.W.Teleport");
+            }
+        }
+        private static bool UseOnRevive
+        {
+            get
+            {
+                return Menu.VChecked("UBAddons.Viktor.W.Revive");
+            }
+        }
         public bool ShouldExecuted()
         {
             return Player.Instance.Hero.Equals(Champion.Viktor);
@@ -109,7 +122,7 @@ namespace UBAddons.Libs
                 {
                     foreach (
                         var enemy in
-                            EntityManager.Heroes.Enemies.Where(x => x.IsValid && WillBeImmobile(x, GetWTime()) && !BlitzcrankSenders.ContainsKey(x) && !ThreshSenders.ContainsKey(x)))
+                            EntityManager.Heroes.Enemies.Where(x => x.IsValid && WillBeImmobile(x, 1.4f) && !BlitzcrankSenders.ContainsKey(x) && !ThreshSenders.ContainsKey(x)))
                     {
                         if (_containsThresh)
                         {
@@ -146,7 +159,7 @@ namespace UBAddons.Libs
                     foreach (var enemy in EntityManager.Heroes.Enemies.Where(h => h.IsValid && !h.IsDead && h.HasBuff(ZhonyasBuffName)))
                     {
                         var buff = enemy.GetBuff(ZhonyasBuffName);
-                        if (buff.EndTime - Game.Time <= 0.2f && buff.EndTime - buff.StartTime > 0f)
+                        if (buff.EndTime - Game.Time <= 0.15f && buff.EndTime - buff.StartTime > 0f)
                         {
                             W.Cast(enemy.Position);
                         }
@@ -156,7 +169,7 @@ namespace UBAddons.Libs
                         foreach (var enemy in EntityManager.Heroes.Enemies.Where(h => h.IsValid && !h.IsDead && h.HasBuff(BardRBuffName)))
                         {
                             var buff = enemy.GetBuff(BardRBuffName);
-                            if (buff.EndTime - Game.Time <= 0.2f && buff.EndTime - buff.StartTime > 0f)
+                            if (buff.EndTime - Game.Time <= 0.15f && buff.EndTime - buff.StartTime > 0f)
                             {
                                 W.Cast(enemy.Position);
                             }
@@ -169,7 +182,7 @@ namespace UBAddons.Libs
                             foreach (var enemy in EntityManager.Heroes.Enemies.Where(h => h.IsValid && h.HasBuff(AatroxDeath)))
                             {
                                 var buff = enemy.GetBuff(AatroxDeath);
-                                if (buff.EndTime - Game.Time <= 0.2f && buff.EndTime - buff.StartTime > 0f)
+                                if (buff.EndTime - Game.Time <= 0.15f && buff.EndTime - buff.StartTime > 0f)
                                 {
                                     W.Cast(enemy.Position);
                                 }
@@ -180,7 +193,7 @@ namespace UBAddons.Libs
                             foreach (var enemy in EntityManager.Heroes.Enemies.Where(h => h.IsValid && h.HasBuff(AniviaRebirth)))
                             {
                                 var buff = enemy.GetBuff(AniviaRebirth);
-                                if (buff.EndTime - Game.Time <= 0.2f && buff.EndTime - buff.StartTime > 0f)
+                                if (buff.EndTime - Game.Time <= 0.15f && buff.EndTime - buff.StartTime > 0f)
                                 {
                                     W.Cast(enemy.Position);
                                 }
@@ -191,7 +204,7 @@ namespace UBAddons.Libs
                             foreach (var enemy in EntityManager.Heroes.Enemies.Where(h => h.IsValid && h.HasBuff(FioraW)))
                             {
                                 var buff = enemy.GetBuff(FioraW);
-                                if (buff.EndTime - Game.Time <= 0.2f && buff.EndTime - buff.StartTime > 0f)
+                                if (buff.EndTime - Game.Time <= 0.15f && buff.EndTime - buff.StartTime > 0f)
                                 {
                                     W.Cast(enemy.Position);
                                 }
@@ -202,7 +215,7 @@ namespace UBAddons.Libs
                             foreach (var enemy in EntityManager.Heroes.Enemies.Where(h => h.IsValid && h.HasBuff(ZileanBuffRevive)))
                             {
                                 var buff = enemy.GetBuff(ZileanBuffRevive);
-                                if (buff.EndTime - Game.Time <= 0.2f && buff.EndTime - buff.StartTime > 0f)
+                                if (buff.EndTime - Game.Time <= 0.15f && buff.EndTime - buff.StartTime > 0f)
                                 {
                                     W.Cast(enemy.Position);
                                 }
@@ -271,11 +284,6 @@ namespace UBAddons.Libs
                     }
                 };
             }
-        }
-
-        public static float GetWTime()
-        {
-            return 1.5f;
         }
 
         private static void Obj_AI_Base_OnBuffGain(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)

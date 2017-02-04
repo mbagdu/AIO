@@ -29,7 +29,7 @@ namespace UBAddons.Champions.Viktor
 
         protected static Spell.Skillshot R { get; set; }
 
-        protected static Menu Menu { get; set; }
+        internal static Menu Menu { get; set; }
         protected static Menu ComboMenu { get; set; }
         protected static Menu HarassMenu { get; set; }
         protected static Menu LaneClearMenu { get; set; }
@@ -190,9 +190,13 @@ namespace UBAddons.Champions.Viktor
         protected override void OnInterruptable(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs args)
         {
             if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || !MenuValue.Misc.GetdangerValue().Contains(args.DangerLevel)) return;
-            if (W.IsReady() && MenuValue.Misc.WI)
+            if (W.IsReady() && MenuValue.Misc.WI && W.IsInRange(sender))
             {
                 W.Cast(sender);
+            }
+            if (R.IsReady() && MenuValue.Misc.RI && R.IsInRange(sender))
+            {
+                R.Cast(sender);
             }
         }
 
@@ -215,7 +219,7 @@ namespace UBAddons.Champions.Viktor
                 CastE(target);
             }
         }
-        internal static bool CastE(Obj_AI_Base target)
+        protected static bool CastE(Obj_AI_Base target)
         {
             if (target == null || !E.IsReady())
             {
@@ -227,19 +231,20 @@ namespace UBAddons.Champions.Viktor
                 if (E1.IsInRange(target))
                 {
                     E.SourcePosition = target.Position;
-                    var otherchamp = EntityManager.Heroes.Enemies.Where(x => x != target);
-                    var othertarget = E.GetTarget(otherchamp);
+                    var otherchamp = EntityManager.Heroes.Enemies.Where(x => x.NetworkId != target.NetworkId);
+                    var othertarget = E.GetTarget(otherchamp, TargetSeclect.Default);
                     var pred = E.GetPrediction(target);
                     if (pred.CanNext(E, MenuValue.General.EHitChance, false))
                     {
                         if (othertarget == null)
                         {
-                            Vector3[] location = target.Position.Symmetry(pred.UnitPosition, 335);
-                            Vector3 start = E1.IsInRange(location[0]) ? location[0] : location[1];
-                            Vector3 end = E1.IsInRange(location[0]) ? location[1] : location[0];
-                            if (E.CastStartToEnd(end, start))
+                            var loc = pred.CastPosition.Extend(target, target.Distance(pred.CastPosition) + 75).To3DWorld();
+                            if (E.IsInRange(loc))
                             {
-                                return true;
+                                if (E.CastStartToEnd(pred.CastPosition, loc))
+                                {
+                                    return true;
+                                }
                             }
                             return false;
                         }
@@ -256,12 +261,13 @@ namespace UBAddons.Champions.Viktor
                             }
                             else
                             {
-                                Vector3[] location = target.Position.Symmetry(pred.UnitPosition, 335);
-                                Vector3 start = E1.IsInRange(location[0]) ? location[0] : location[1];
-                                Vector3 end = E1.IsInRange(location[0]) ? location[1] : location[0];
-                                if (E.CastStartToEnd(end, start))
+                                var loc = pred.CastPosition.Extend(target, target.Distance(pred.CastPosition) + 75).To3DWorld();
+                                if (E.IsInRange(loc))
                                 {
-                                    return true;
+                                    if (E.CastStartToEnd(pred.CastPosition, loc))
+                                    {
+                                        return true;
+                                    }
                                 }
                                 return false;
                             }
@@ -280,28 +286,24 @@ namespace UBAddons.Champions.Viktor
                     Vector2 intersection2;
                     int count = Geometry.LineCircleIntersection(player.Position.X, player.Position.Y, E1.Range, pred.CastPosition.To2D(), pred.CastPosition.Extend(target.Position, 600), out intersection1, out intersection2);
                     Vector3[] intersection = new[] { intersection1.To3DWorld(), intersection2.To3DWorld() };
+                    Vector3 castStartPos = intersection.OrderBy(x => x.Distance(pred.CastPosition)).FirstOrDefault();
+                    if (count != 0 && castStartPos.IsValid())
+                    {
+                        E.SourcePosition = castStartPos;
+                        pred = E.GetPrediction(target);
+                    }
                     if (pred.CanNext(E, MenuValue.General.EHitChance, false))
                     {
-                        if (E1.IsInRange(pred.CastPosition))
+                        if (count != 0 && E.Range - player.Distance(pred.CastPosition) >= 75 && MenuValue.General.EDirection)
                         {
-                            if (E.CastStartToEnd(pred.CastPosition, player.Position.Extend(pred.CastPosition, E1.Range - 250).To3DWorld()))
+                            if (E.CastStartToEnd(pred.CastPosition, castStartPos))
                             {
                                 return true;
                             }
                         }
-                        else
+                        else if (E.CastStartToEnd(pred.CastPosition, player.Position.Extend(pred.CastPosition, E1.Range - 5).To3DWorld()))
                         {
-                            if (count != 0 && E.Range - player.Distance(pred.CastPosition) > 100 && MenuValue.General.EDirection)
-                            {
-                                if (E.CastStartToEnd(pred.CastPosition, intersection.OrderBy(x => x.Distance(pred.CastPosition)).FirstOrDefault()))
-                                {
-                                    return true;
-                                }
-                            }
-                            else if (E.CastStartToEnd(pred.CastPosition, player.Position.Extend(pred.CastPosition, E1.Range - 5).To3DWorld()))
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                     }
                     return false;

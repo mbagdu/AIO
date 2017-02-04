@@ -220,18 +220,23 @@ namespace UBAddons.Champions.Lulu
         #region DamageRaw
         protected static float PixDamage(Obj_AI_Base target)
         {
-            int levelmod = (int)(player.Level / 2) - player.Level % 2;
+            int perlevel = 3 + player.Level * 2;
             var pred = Prediction.Position.PredictLinearMissile(target, player.GetAutoAttackRange() + 20, 30, (int)player.AttackDelay + 1, 3000, 0, QPix.SourcePosition);
             if (pred.CollisionObjects == null)
             {
-                return player.CalculateDamageOnUnit(target, DamageType.Magical, 9 + 12 * levelmod);
+                return player.CalculateDamageOnUnit(target, DamageType.Magical, 9 + 12 * perlevel);
             }
             return 0;
         }
-        protected static float QDamage(Obj_AI_Base target, int CollisionCount = 0)
+        protected static float QDamage(Obj_AI_Base target)
         {
+            if (target == null)
+            {
+                return 0;
+            }
+            var prediction = Q.GetPrediction(target);
             var raw = player.CalculateDamageOnUnit(target, DamageType.Magical, new float[] { 0f, 80f, 125f, 170f, 215, 260f }[Q.Level] + 0.5f * player.TotalMagicalDamage);
-            if (CollisionCount < float.Epsilon)
+            if (prediction.CollisionObjects.Any(x => x.IsValidTarget() && x.IsEnemy))
             {
                 return raw;
             }

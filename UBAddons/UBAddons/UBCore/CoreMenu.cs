@@ -156,7 +156,7 @@ namespace UBAddons.UBCore
         static void AIHeroClient_OnBasicAttack(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (!GapCloser.VChecked("UBAddons.Core.GapCloser.Melee")) return;
-            if (sender.IsMelee)
+            if (sender.IsMelee && args.Target is AIHeroClient)
             {
                 var attacker = sender as AIHeroClient;
                 if (attacker == null) return;

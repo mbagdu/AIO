@@ -278,19 +278,19 @@ namespace UBAddons.Champions.Taliyah
                             StartPos = pred.CastPosition.Extend(E_Object.Position, pred.CastPosition.Distance(E_Object.Position) + 200f).To3DWorld();
                             W.CastStartToEnd(StartPos, pred.CastPosition);
                         }
-                        else
-                        {
-                            if (player.Health > target.Health)
-                            {
-                                StartPos = pred.CastPosition.Extend(Player.Instance, pred.CastPosition.Distance(Player.Instance) + 200f).To3DWorld();
-                                W.CastStartToEnd(StartPos, pred.CastPosition);
-                            }
-                            else
-                            {
-                                StartPos = Player.Instance.Position.Extend(pred.CastPosition, pred.CastPosition.Distance(Player.Instance) + 200f).To3DWorld();
-                                W.CastStartToEnd(StartPos, pred.CastPosition);
-                            }
-                        }
+                        //else
+                        //{
+                        //    if (player.Health > target.Health)
+                        //    {
+                        //        StartPos = pred.CastPosition.Extend(Player.Instance, pred.CastPosition.Distance(Player.Instance) + 200f).To3DWorld();
+                        //        W.CastStartToEnd(StartPos, pred.CastPosition);
+                        //    }
+                        //    else
+                        //    {
+                        //        StartPos = Player.Instance.Position.Extend(pred.CastPosition, pred.CastPosition.Distance(Player.Instance) + 200f).To3DWorld();
+                        //        W.CastStartToEnd(StartPos, pred.CastPosition);
+                        //    }
+                        //}
                     }
                     break;
             }

@@ -32,7 +32,7 @@ namespace UBAddons.Champions.Ziggs.Modes
                         }
                     }
                 }
-                var turret = EntityManager.Turrets.Enemies.Where(x => x.IsValidTarget(W.Range) && x.HealthPercent < 22.5 + 2.5 * W.Level).FirstOrDefault();
+                var turret = EntityManager.Turrets.Enemies.Where(x => x.IsValidTarget(W.Range) && x.HealthPercent <= 22.5 + 2.5 * W.Level).FirstOrDefault();
                 if (turret != null)
                 {
                     if (W.Cast(turret.Position))

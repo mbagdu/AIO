@@ -61,7 +61,11 @@ namespace UBAddons.Champions.Brand
                 if (missile != null && E.IsReady())
                 {
                     var target = ObjectManager.Get<AIHeroClient>().Where(x => x.IsValidTarget() && x.IsInMissileLine(missile));
-                    E.GetTarget(target);
+                    if (E.GetTarget(target) != null)
+                    {
+                        E.Cast(E.GetTarget(target));
+                    }
+                    
                 }
             };
         }
@@ -484,11 +488,11 @@ namespace UBAddons.Champions.Brand
 
                 public static bool UseW { get { return ComboMenu.GetSlotCheckBox(SpellSlot.W); } }
 
-                public static bool OnlyExtra { get { return ComboMenu.VChecked("UBAddons.Brand.Q.Only.Extra"); } }
+                public static bool OnlyExtra { get { return ComboMenu.VChecked("UBAddons.Brand.W.Only.Extra"); } }
 
                 public static bool UseE { get { return ComboMenu.GetSlotCheckBox(SpellSlot.E); } }
 
-                public static bool OnlySpread { get { return ComboMenu.VChecked("UBAddons.Brand.Q.Only.Spread"); } }
+                public static bool OnlySpread { get { return ComboMenu.VChecked("UBAddons.Brand.E.Only.Spread"); } }
 
                 public static bool UseR { get { return ComboMenu.GetSlotCheckBox(SpellSlot.R); } }
 

@@ -33,7 +33,7 @@ namespace UBAddons.Champions.Alistar.Modes
                     E.Cast();
                 }
             }
-            if ((player.HealthPercent <= MenuValue.General.HP || MenuValue.General.EnemyCount >= player.CountEnemyChampionsInRange(500)) && R.IsReady())
+            if ((player.HealthPercent <= MenuValue.General.HP || MenuValue.General.EnemyCount <= player.CountEnemyChampionsInRange(500)) && R.IsReady())
             {
                 R.Cast();
             }

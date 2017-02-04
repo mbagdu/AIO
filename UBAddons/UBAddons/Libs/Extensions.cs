@@ -503,6 +503,22 @@ namespace UBAddons.Libs
                 }
             }
         }
+        public static AIHeroClient GetGapcloseTarget(this Spell.SpellBase spell, int Rangetoget)
+        {
+            var target = TargetSelector.GetTarget(Rangetoget, spell.DamageType, Game.CursorPos);
+            if (target != null)
+            {
+                if (spell.IsInRange(target))
+                {
+                    return target;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
         public static AIHeroClient GetTarget(this Spell.SpellBase spell, int additionalRange = 50)
         {
             return TargetSelector.GetTarget(spell.Range + additionalRange, spell.DamageType);

@@ -57,18 +57,22 @@ namespace UBAddons.Champions.Viktor.Modes
             }
             if (R.Name == "ViktorChaosStormGuide")
             {
-                var Robj = ObjectManager.Get<Obj_AI_Minion>().Where(x =>x.Name.Equals("ViktorSingularity") && x.IsValid && !x.IsDead && x.IsAlly).FirstOrDefault();
+                var Robj = ObjectManager.Get<GameObject>().Where(x =>x.Name.Equals("Viktor_Base_R_Droid.troy") && x.IsValid && !x.IsDead && x.IsAlly).FirstOrDefault();
                 if (Robj != null)
                 {
                     //I tried to use Target Seclector, but It's stupid
-                    var target = EntityManager.Heroes.Enemies.Where(x => x.IsValidTarget(1000, false, Robj.Position) && !x.IsDead && !x.IsZombie).OrderBy(x => x.Health).FirstOrDefault(x => x.Health < HandleDamageIndicator(x));
+                    var target = EntityManager.Heroes.Enemies.Where(x => x.IsValidTarget(1500, false, Robj.Position)).OrderBy(x => x.Health).FirstOrDefault(x => x.Health <= HandleDamageIndicator(x));
                     if (target != null)
                     {
-                        R.Cast(target.Position);
+                        R.Cast(target);
                     }
-                    if (target == null)
+                    else
                     {
-                        R.Cast(player.Position);
+                        var target2 = TargetSelector.GetTarget(2000, DamageType.Magical);
+                        if (target2 != null)
+                        {
+                            R.Cast(target2);
+                        }
                     }
                 }
             }

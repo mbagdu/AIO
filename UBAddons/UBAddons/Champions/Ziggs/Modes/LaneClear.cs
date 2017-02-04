@@ -32,7 +32,10 @@ namespace UBAddons.Champions.Ziggs.Modes
                     var farmloc = W.GetBestCircularCastPosition(Minion);
                     if (farmloc.HitNumber >= MenuValue.LaneClear.WHit)
                     {
-                        W.Cast(farmloc.CastPosition);
+                        if (W.Cast(farmloc.CastPosition))
+                        {
+                            Core.DelayAction(() => Player.CastSpell(SpellSlot.W), W.CastDelay + (int)player.Distance(farmloc.CastPosition) / W.Speed);
+                        }
                     }
                 }
             }

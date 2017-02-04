@@ -181,13 +181,13 @@ namespace UBAddons.Champions.Zilean
                 case true:
                     {
                         var Ally = EntityManager.Heroes.Allies.Where(x => x.IsValid && !x.IsDead && ! x.IsZombie).OrderBy(x => x.Distance(args.End)).First();
-                        if ((MenuValue.Misc.Idiot ? Ally.Distance(args.End) <= 250 : Q.IsInRange(args.End) || sender.IsAttackingPlayer) && MenuValue.Misc.QGap)
+                        if ((MenuValue.Misc.Idiot ? Ally.Distance(args.End) <= 250 : Q.IsInRange(args.End) || sender.IsAttackingPlayer))
                         {
-                            if (Q.IsReady())
+                            if (Q.IsReady() && MenuValue.Misc.QGap)
                             {
                                 Q.Cast(args.End);
                             }
-                            else if (E.IsReady())
+                            else if (E.IsReady() && MenuValue.Misc.EGap)
                             {
                                 E.Cast(Ally);
                             }
@@ -213,13 +213,16 @@ namespace UBAddons.Champions.Zilean
         protected override void OnInterruptable(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs args)
         {
             if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || !MenuValue.Misc.dangerValue.Contains(args.DangerLevel)) return;
-            if (Q.IsReady() && MenuValue.Misc.QI && Q.IsInRange(sender))
+            if (Q.IsInRange(sender))
             {
-                Q.Cast(sender);
-            }
-            else if (W.IsReady() && MenuValue.Misc.WI)
-            {
-                W.Cast();
+                if (Q.IsReady() && MenuValue.Misc.QI)
+                {
+                    Q.Cast(sender);
+                }
+                else if (W.IsReady() && MenuValue.Misc.WI)
+                {
+                    W.Cast();
+                }
             }
         }
 

@@ -135,7 +135,7 @@ namespace UBAddons.Champions.Ekko
                     FleeMenu.Add(BeginText + "E", new CheckBox("Use E for flee"));
                     FleeMenu.Add(BeginText + "E.Disable", new CheckBox("Disable E when jump spot near"));
                     FleeMenu.Add(BeginText + "E.Distance", new Slider("Range for disable", 600, 0, 1000));
-                    FleeMenu.Add(BeginText + "AA", new CheckBox("AA for flee"));
+                    FleeMenu.Add(BeginText + "AA.ToMinion", new CheckBox("AA to minion"));
                     FleeMenu.Add(BeginText + "AA.ToMonster", new CheckBox("AA to monster"));
                     FleeMenu.Add(BeginText + "AA.ToChamp", new CheckBox("AA to champ"));
                     FleeMenu.Add(BeginText + "AA.HP", new Slider("Min {0}% HP for AA champ & monster", 15));
@@ -481,7 +481,7 @@ namespace UBAddons.Champions.Ekko
 
                 public static int Distance { get { return FleeMenu.VSliderValue(BeginText + "E.Distance"); } }
 
-                public static bool UseAA { get {  return FleeMenu.VChecked(BeginText + "AA"); } }
+                public static bool AAMinion { get {  return FleeMenu.VChecked(BeginText + "AA.ToMinion"); } }
 
                 public static bool AAMonster { get { return FleeMenu.VChecked(BeginText + "AA.ToMonster"); } }
 

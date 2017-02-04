@@ -19,7 +19,7 @@ namespace UBAddons.Champions.Ekko.Modes
                 var Enemyminions = EntityManager.MinionsAndMonsters.EnemyMinions.Where(m => m.IsValidTarget(player.GetAutoAttackRange()) && rectangle.IsInside(m)).OrderBy(x => x.Distance(Game.CursorPos));
                 var monsters = EntityManager.MinionsAndMonsters.Monsters.Where(m => m.IsValidTarget(player.GetAutoAttackRange()) && rectangle.IsInside(m)).OrderBy(x => x.Distance(Game.CursorPos));
                 var champs = EntityManager.Heroes.Enemies.Where(c => c.IsValidTarget(player.GetAutoAttackRange()) && rectangle.IsInside(c)).OrderBy(x => x.Distance(Game.CursorPos));
-                if (Enemyminions.Any())
+                if (Enemyminions.Any() && MenuValue.Flee.AAMinion)
                 {
                     Player.IssueOrder(GameObjectOrder.AttackUnit, Enemyminions.FirstOrDefault());
                 }

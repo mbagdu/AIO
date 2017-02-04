@@ -56,7 +56,7 @@ namespace UBAddons.Libs
 
             if (menu != null)
             {
-                return menu.VSliderValue(General.Variables.AddonName + "." + Player.Instance.Hero + "." + menu.DisplayName + ".Priority." + champ.Hero);
+                return menu.VSliderValue(General.Variables.AddonName + "." + Player.Instance.Hero + ".Saver.Priority." + champ.Hero);
             }
             else if (priority5.Equals(ChampionHero))
             {

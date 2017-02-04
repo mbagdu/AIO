@@ -141,8 +141,8 @@ namespace UBAddons.Champions.Kassadin
                     ComboMenu.CreatSlotComboBox(SpellSlot.W, 0, "After AA", "Before AA");
                     ComboMenu.CreatSlotCheckBox(SpellSlot.E);
                     ComboMenu.CreatSlotCheckBox(SpellSlot.R);
-                    ComboMenu.Add("UBAddons.Kassadin.R.HP.Enemy", new Slider("Enemy HP {0}% for R", 60));
-                    ComboMenu.Add("UBAddons.Kassadin.R.HP.My", new Slider("My HP {0}% for R", 30));
+                    //ComboMenu.Add("UBAddons.Kassadin.R.HP.Enemy", new Slider("Enemy HP {0}% for R", 60));
+                    //ComboMenu.Add("UBAddons.Kassadin.R.HP.My", new Slider("My HP {0}% for R", 30));
                 }
                 #endregion
 
@@ -447,9 +447,9 @@ namespace UBAddons.Champions.Kassadin
 
                 public static bool UseR { get { return ComboMenu.GetSlotCheckBox(SpellSlot.R); } }
 
-                public static int MyHP { get { return ComboMenu.VSliderValue("UBAddons.Kassadin.R.HP.My"); } }
+                //public static int MyHP { get { return ComboMenu.VSliderValue("UBAddons.Kassadin.R.HP.My"); } }
 
-                public static int EnemyHP { get { return ComboMenu.VSliderValue("UBAddons.Kassadin.R.HP.Enemy"); } }
+                //public static int EnemyHP { get { return ComboMenu.VSliderValue("UBAddons.Kassadin.R.HP.Enemy"); } }
 
             }
 

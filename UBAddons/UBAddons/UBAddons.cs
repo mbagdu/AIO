@@ -52,32 +52,43 @@ namespace UBAddons
             ShowNotification();
             Core.DelayAction(() =>
             {
-                Initialize(PluginInstance);
-                UtilityPlugin.OnLoad();
-                if (UBCore.CoreMenu.UseOnTick)
+                if (Initialize(PluginInstance))
                 {
-                    Game.OnTick += UtilityPlugin.OnUpdate;
-                }
-                if (UBCore.CoreMenu.UseOnUpdate)
-                {
-                    Game.OnUpdate += UtilityPlugin.OnUpdate;
+                    UtilityPlugin.OnLoad();
+                    if (UBCore.CoreMenu.UseOnTick)
+                    {
+                        Game.OnTick += UtilityPlugin.OnUpdate;
+                    }
+                    if (UBCore.CoreMenu.UseOnUpdate)
+                    {
+                        Game.OnUpdate += UtilityPlugin.OnUpdate;
+                    }
                 }
             }, 200);
         }
-        private static void Initialize(IHeroBase addonbase)
+        private static bool Initialize(IHeroBase addonbase)
         {
-            addonbase.CreateMenu();
-            Interrupter.OnInterruptableSpell += addonbase.OnInterruptable;
-            Orbwalker.OnUnkillableMinion += addonbase.OnUnkillableMinion;
-            Gapcloser.OnGapcloser += addonbase.OnGapcloser;
-            Drawing.OnDraw += addonbase.OnDraw;
-            if (UBCore.CoreMenu.UseOnTick)
+            try
             {
-                Game.OnTick += addonbase.OnTick;
+                addonbase.CreateMenu();
+                Interrupter.OnInterruptableSpell += addonbase.OnInterruptable;
+                Orbwalker.OnUnkillableMinion += addonbase.OnUnkillableMinion;
+                Gapcloser.OnGapcloser += addonbase.OnGapcloser;
+                Drawing.OnDraw += addonbase.OnDraw;
+                if (UBCore.CoreMenu.UseOnTick)
+                {
+                    Game.OnTick += addonbase.OnTick;
+                }
+                if (UBCore.CoreMenu.UseOnUpdate)
+                {
+                    Game.OnUpdate += addonbase.OnTick;
+                }
+                return true;
             }
-            if (UBCore.CoreMenu.UseOnUpdate)
+            catch (Exception e)
             {
-                Game.OnUpdate += addonbase.OnTick;
+                Debug.Print(e.ToString(), Console_Message.Error);
+                return false;
             }
         }
         private static void ShowNotification()

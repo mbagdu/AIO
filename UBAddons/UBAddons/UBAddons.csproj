@@ -287,6 +287,14 @@
     <Compile Include="Champions\Viktor\Modes\LastHit.cs" />
     <Compile Include="Champions\Viktor\Modes\PermaActive.cs" />
     <Compile Include="Champions\Viktor\Viktor.cs" />
+    <Compile Include="Champions\Warwick\Modes\Combo.cs" />
+    <Compile Include="Champions\Warwick\Modes\Flee.cs" />
+    <Compile Include="Champions\Warwick\Modes\Harass.cs" />
+    <Compile Include="Champions\Warwick\Modes\JungleClear.cs" />
+    <Compile Include="Champions\Warwick\Modes\LaneClear.cs" />
+    <Compile Include="Champions\Warwick\Modes\LastHit.cs" />
+    <Compile Include="Champions\Warwick\Modes\PermaActive.cs" />
+    <Compile Include="Champions\Warwick\Warwick.cs" />
     <Compile Include="Champions\Xerath\Modes\Combo.cs" />
     <Compile Include="Champions\Xerath\Modes\Flee.cs" />
     <Compile Include="Champions\Xerath\Modes\Harass.cs" />
@@ -374,7 +382,6 @@
     <Folder Include="Champions\Swain\" />
     <Folder Include="Champions\Talon\" />
     <Folder Include="Champions\Vladimir\" />
-    <Folder Include="Champions\Warwick\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Bar.png" />

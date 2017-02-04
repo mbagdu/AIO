@@ -33,7 +33,6 @@ namespace UBAddons.Champions.Annie
         internal static Menu LastHitMenu { get; set; }
         internal static Menu MiscMenu { get; set; }
         internal static Menu DrawMenu { get; set; }
-
         static Annie()
         {
             Q = new Spell.Targeted(SpellSlot.Q, 625, DamageType.Magical);
@@ -46,7 +45,7 @@ namespace UBAddons.Champions.Annie
             {
                 if (sender is Obj_AI_Turret || sender is AIHeroClient || sender.IsMonster)
                 {
-                    if (args.Target.IsMe && E.IsReady() && MenuValue.General.EOnAttack)
+                    if (args.Target.IsMe && E.IsReady() && MenuValue.General.EOnAttack && MenuValue.General.ComboOnly)
                     {
                         E.Cast();
                     }
@@ -54,7 +53,7 @@ namespace UBAddons.Champions.Annie
             };
             Obj_AI_Base.OnProcessSpellCast += delegate(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
             {
-                if (args.Target != null && args.Target.IsMe && E.IsReady() && MenuValue.General.EOnSpell)
+                if (args.Target != null && args.Target.IsMe && E.IsReady() && MenuValue.General.EOnSpell && MenuValue.General.ComboOnly)
                 {
                     E.Cast();
                 }
@@ -62,7 +61,8 @@ namespace UBAddons.Champions.Annie
             MissileClient.OnCreate += delegate(GameObject sender, EventArgs args)
             {
                 var Qmissile = sender as MissileClient;
-                if (sender != null && Qmissile.SpellCaster.IsMe && Qmissile.Target != null && Qmissile.Target is AIHeroClient && Qmissile.Slot.Equals(SpellSlot.Q))
+                if (sender != null && Qmissile.SpellCaster.IsMe && Qmissile.Target != null 
+                && Qmissile.Target is AIHeroClient && Qmissile.Slot.Equals(SpellSlot.Q) && MenuValue.General.EOnQ && MenuValue.General.ComboOnly)
                 {
                     if (Qmissile.SpellCaster.IsMe && Passive_Count == 3)
                     {
@@ -79,11 +79,14 @@ namespace UBAddons.Champions.Annie
                 #region Mainmenu
                 Menu = MainMenu.AddMenu("UB" + player.Hero, "UBAddons.MainMenu" + player.Hero, "UB" + player.Hero + " - UBAddons - by U.Boruto");
                 Menu.AddGroupLabel("General Setting");
-                Menu.Add("UBAddons.Annie.E.Attack.Enable", new CheckBox("E on Enemy/Turret/Monster Attack"));
-                Menu.Add("UBAddons.Annie.E.Spell.Enable", new CheckBox("E on Enemy spell"));
-                Menu.Add("UBAddons.Annie.EQ.Enable", new CheckBox("E on On Q - CanStun"));
                 Menu.CreatSlotHitChance(SpellSlot.W);
                 Menu.CreatSlotHitChance(SpellSlot.R);
+                Menu.AddGroupLabel("E Settings");
+                Menu.Add("UBAddons.Annie.E.Combo.Only", new CheckBox("Auto use on Combo Only"));
+                Menu.Add("UBAddons.Annie.E.Attack.Enable", new CheckBox("E on Enemy/Turret/Monster Attack"));
+                Menu.Add("UBAddons.Annie.E.Spell.Enable", new CheckBox("E on Enemy spell"));
+                Menu.Add("UBAddons.Annie.EQ.Enable", new CheckBox("E on Q - CanStun"));
+
                 #endregion
 
                 #region Combo
@@ -400,9 +403,14 @@ namespace UBAddons.Champions.Annie
 
                 public static int RHitChance { get { return Menu.GetSlotHitChance(SpellSlot.R); } }
 
+                public static bool ComboOnly { get { return Orbwalker.ActiveModes.Combo.IsOrb() || !Menu.VChecked("UBAddons.Annie.E.Combo.Only"); } }
+
                 public static bool EOnAttack { get { return Menu.VChecked("UBAddons.Annie.E.Attack.Enable"); } }
 
                 public static bool EOnSpell { get { return Menu.VChecked("UBAddons.Annie.E.Spell.Enable"); } }
+
+                public static bool EOnQ { get { return Menu.VChecked("UBAddons.Annie.EQ.Enable"); } }
+
             }
 
             internal static class Combo
