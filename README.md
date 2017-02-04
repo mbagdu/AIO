@@ -28,9 +28,9 @@ Here is my AIO
 * Syndra
 * Veigar
 * Twitch
+* Warwick
 
 ## To Do:
-* Warwick
 * Gnar
 * Lissandra
 * 11 middle champ remaining
