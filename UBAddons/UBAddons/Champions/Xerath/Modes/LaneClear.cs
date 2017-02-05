@@ -15,7 +15,7 @@ namespace UBAddons.Champions.Xerath.Modes
             if (MenuValue.LaneClear.UseQ && Q.IsReady())
             {
                 var Minion = Q.GetLaneMinions(MenuValue.LaneClear.OnlyKillable);
-                var farmLoc = Q.GetBestLinearCastPosition(Minion, MenuValue.General.WHitChance);
+                var farmLoc = Q.GetBestLinearCastPosition(Minion, MenuValue.General.QHitChance);
                 if (farmLoc.HitNumber >= MenuValue.LaneClear.Qhit)
                 {
                     Q.Cast(farmLoc.CastPosition);

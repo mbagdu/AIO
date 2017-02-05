@@ -104,13 +104,29 @@ namespace UBAddons.Champions.Lissandra
             };
             Game.OnUpdate += delegate (EventArgs args)
             {
-                if (!Gapclose || EMissile == null || EEnd == null || E.ToggleState == 1) return;
+                if (!Gapclose || EMissile == null || EEnd == null || E.ToggleState == 1 || !player.HasBuff("LissandraE")) return;
                 if (EMissile.Distance(EEnd) <= 25)
                 {
                     Player.CastSpell(SpellSlot.E);
                     Gapclose = false;
                 }
-            };  
+            };
+            Obj_AI_Base.OnBasicAttack += delegate (Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+            {
+                if (!(sender is Obj_AI_Turret) || !(args.Target is AIHeroClient) || !sender.IsAlly || !args.Target.IsEnemy || sender == null || !R.IsReady() || !MenuValue.General.AutoR)
+                {
+                    return;
+                }
+                var attacker = sender as Obj_AI_Turret;
+                var target = args.Target as AIHeroClient;
+                if (attacker != null && target != null)
+                {
+                    if (target.IsValidTarget(R.Range) && (TargetSelector.GetPriority(target) >= 4 || target.Health < sender.GetAutoAttackDamage(target, true) * 2 + RDamage(target)))
+                    {
+                        R.Cast();
+                    }
+                }
+            };
             #endregion
         }
 
@@ -124,6 +140,8 @@ namespace UBAddons.Champions.Lissandra
                 Menu.AddGroupLabel("General Setting");
                 Menu.CreatSlotHitChance(SpellSlot.Q);
                 Menu.CreatSlotHitChance(SpellSlot.E);
+                Menu.Add(Variables.AddonName + ".Lissandra.Auto.R.Turret", new CheckBox("Auto R if enemy is attacked by ally turret"));
+
                 #endregion
 
                 #region Combo
@@ -260,19 +278,27 @@ namespace UBAddons.Champions.Lissandra
         }
         protected static bool CastE(Obj_AI_Base target, bool gapclose)
         {
-            if (target != null && E.IsReady() && E.ToggleState != 2 && Core.GameTickCount - LastETick > 120)
+            if ( E.IsReady() && !player.HasBuff("LissandraE") && Core.GameTickCount - LastETick > 120)
             {
-                var pred = E.GetPrediction(target);
-                if (player.Distance(pred.CastPosition) <= 725 || pred.GetCollisionObjects<Obj_AI_Base>().Any(x => x.IsValidTarget() && x.IsEnemy))
+                if (target != null)
                 {
-                    if (pred.CanNext(E, MenuValue.General.EHitChance, false))
+                    var pred = E.GetPrediction(target);
+                    if (player.Distance(pred.CastPosition) <= 725 || pred.GetCollisionObjects<Obj_AI_Base>().Any(x => x.IsValidTarget() && x.IsEnemy))
                     {
-                        if (E.Cast(pred.CastPosition))
+                        if (pred.CanNext(E, MenuValue.General.EHitChance, false))
                         {
-                            Gapclose = gapclose;
-                            return true;
+                            if (E.Cast(pred.CastPosition))
+                            {
+                                Gapclose = gapclose;
+                                return true;
+                            }
                         }
                     }
+                }
+                else
+                {
+                    E.Cast(player.Position.Extend(Game.CursorPos, E.Range).To3DWorld());
+                    Gapclose = true;
                 }
             }
             return false;
@@ -469,6 +495,8 @@ namespace UBAddons.Champions.Lissandra
                 public static int QHitChance { get { return Menu.GetSlotHitChance(SpellSlot.Q); } }
 
                 public static int EHitChance { get { return Menu.GetSlotHitChance(SpellSlot.E); } }
+
+                public static bool AutoR { get { return Menu.VChecked(Variables.AddonName + ".Lissandra.Auto.R.Turret"); } }
 
             }
             internal static class Combo

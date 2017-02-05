@@ -1,5 +1,5 @@
 ﻿
-namespace UBMiddle.Champions.Chogath.Modes
+namespace UBAddons.Champions.Chogath.Modes
 {
     class LastHit : Chogath
     {

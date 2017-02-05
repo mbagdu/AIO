@@ -392,35 +392,36 @@ namespace UBAddons.Champions.TwistedFate
         internal static void LogicPickedCard(bool use, int Logic)
         {
             if (!W.IsReady() || !use) return;
-            var WTar = W.GetTarget();
-            if (WTar != null) return;
+            switch (Logic)
             {
-                switch (Logic)
-                {
-                    case 0:
+                case 0:
+                    {
+                        if (Orbwalker.ActiveModes.Combo.IsOrb() || Orbwalker.ActiveModes.Harass.IsOrb())
                         {
-                            if (Orbwalker.ActiveModes.Combo.IsOrb() || Orbwalker.ActiveModes.Harass.IsOrb())
+                            var WTar = W.GetTarget();
+                            if (MenuValue.General.ShouldBlue)
                             {
-                                if (MenuValue.General.ShouldBlue)
-                                {
-                                    Pick(CardType.Blue);
-                                }
-                                else if (WTar.CountEnemyHeroesInRangeWithPrediction(180, 450) >= MenuValue.General.RedHit)
-                                {
-                                    Pick(CardType.Red);
-                                }
-                                else
-                                {
-                                    Pick(CardType.Yellow);
-                                }
+                                Pick(CardType.Blue);
                             }
-                            if (Orbwalker.ActiveModes.LaneClear.IsOrb() || Orbwalker.ActiveModes.JungleClear.IsOrb())
+                            else if (WTar.CountEnemyHeroesInRangeWithPrediction(180, 450) >= MenuValue.General.RedHit)
+                            {
+                                Pick(CardType.Red);
+                            }
+                            else
+                            {
+                                Pick(CardType.Yellow);
+                            }
+                        }
+                        if (Orbwalker.ActiveModes.LaneClear.IsOrb() || Orbwalker.ActiveModes.JungleClear.IsOrb())
+                        {
+                            var WTar = (W.GetLaneMinions() ?? W.GetJungleMobs()).FirstOrDefault();
+                            if (WTar != null)
                             {
                                 if (MenuValue.General.ShouldBlue)
                                 {
                                     Pick(CardType.Blue);
                                 }
-                                else if (WTar != null && WTar.CountEnemyMinionsInRangeWithPrediction(200, 450) >= MenuValue.General.RedHit)
+                                else if (WTar.CountEnemyMinionsInRangeWithPrediction(200, 450) >= MenuValue.General.RedHit)
                                 {
                                     Pick(CardType.Red);
                                 }
@@ -434,25 +435,25 @@ namespace UBAddons.Champions.TwistedFate
                                 }
                             }
                         }
-                        break;
-                    case 1:
-                        {
-                            Pick(CardType.Yellow);
-                        }
-                        break;
-                    case 2:
-                        {
-                            Pick(CardType.Red);
-                        }
-                        break;
-                    case 3:
-                        {
-                            Pick(CardType.Blue);
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                case 1:
+                    {
+                        Pick(CardType.Yellow);
+                    }
+                    break;
+                case 2:
+                    {
+                        Pick(CardType.Red);
+                    }
+                    break;
+                case 3:
+                    {
+                        Pick(CardType.Blue);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 

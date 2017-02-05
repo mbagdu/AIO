@@ -1,9 +1,9 @@
 ﻿using EloBuddy;
 using EloBuddy.SDK;
 using System.Linq;
-using UBMiddle.Libs;
+using UBAddons.Libs;
 
-namespace UBMiddle.Champions.Akali.Modes
+namespace UBAddons.Champions.Akali.Modes
 {
     class LaneClear : Akali
     {

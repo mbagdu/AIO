@@ -371,9 +371,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Champions\Akali\" />
     <Folder Include="Champions\AurelionSol\" />
-    <Folder Include="Champions\Chogath\" />
     <Folder Include="Champions\Fizz\" />
     <Folder Include="Champions\Gangplank\" />
     <Folder Include="Champions\Gnar\" />

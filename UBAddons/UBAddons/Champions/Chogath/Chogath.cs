@@ -4,36 +4,22 @@ using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
-using SharpDX;
 using System;
 using System.Linq;
-using System.Collections.Generic;
+using System.Drawing;
 using UBAddons.General;
 using UBAddons.Libs;
 using UBAddons.Log;
-using Color = System.Drawing.Color;
 
-namespace UBAddons.Champions.Syndra
+namespace UBAddons.Champions.Chogath
 {
-    internal class Syndra : ChampionPlugin
+    internal class Chogath : ChampionPlugin
     {
         protected static AIHeroClient player = Player.Instance;
-        protected static int LastWCast { get; set; }
-        protected static bool IsCombo { get; set; }
-        protected static bool IsWHolding { get; set; }
-        protected static bool IsHoldingPet { get; set; }
-        protected static IEnumerable<Obj_AI_Minion> Balls
-        {
-            get
-            {
-                return ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValid && !x.IsDead && x.IsAlly && x.Name.Equals("seed"));
-            }
-        }
         protected static Spell.Skillshot Q { get; set; }
         protected static Spell.Skillshot W { get; set; }
-        protected static Spell.Skillshot E { get; set; }
-        protected static Spell.Skillshot EQ { get; set; }
-        protected static Spell.SpellBase R { get; set; }
+        protected static Spell.Active E { get; set; }
+        protected static Spell.Targeted R { get; set; }
 
         protected static Menu Menu { get; set; }
         protected static Menu ComboMenu { get; set; }
@@ -44,12 +30,16 @@ namespace UBAddons.Champions.Syndra
         protected static Menu LastHitMenu { get; set; }
         protected static Menu DrawMenu { get; set; }
 
-        static Syndra()
+        protected static int LastETick { get; set; }
+        protected static bool Gapclose { get; set; }
+        protected static MissileClient EMissile { get; set; }
+        protected static Obj_GeneralParticleEmitter EEnd { get; set; }
+
+        static Chogath()
         {
             Q = new Spell.Skillshot(SpellSlot.Q, DamageType.Magical)
             {
                 AllowedCollisionCount = int.MaxValue,
-                CastDelay = 600,
             };
 
             W = new Spell.Skillshot(SpellSlot.W, DamageType.Magical)
@@ -57,89 +47,11 @@ namespace UBAddons.Champions.Syndra
                 AllowedCollisionCount = int.MaxValue,
             };
 
-            E = new Spell.Skillshot(SpellSlot.E, DamageType.Magical)
-            {
-                AllowedCollisionCount = int.MaxValue,
-            };
+            E = new Spell.Active(SpellSlot.E);
 
-            EQ = new Spell.Skillshot(SpellSlot.E, 1200, SkillShotType.Linear, 600, 2500, 65, DamageType.Magical)
-            {
-                AllowedCollisionCount = int.MaxValue,
-            };
-
-            R = new Spell.Targeted(SpellSlot.R, 675, DamageType.Magical);
+            R = new Spell.Targeted(SpellSlot.R, 550, DamageType.True);
 
             DamageIndicator.DamageDelegate = HandleDamageIndicator;
-            Game.OnUpdate += delegate (EventArgs args)
-            {
-                IsWHolding = player.HasBuff("syndrawtooltip");
-                var EnemyPet = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsPet() && x.IsValidTarget(W.Range) && !x.IsAlly);
-                if (EnemyPet.Any())
-                {
-                    if ((!IsWHolding || W.ToggleState != 2) && LastWCast < Core.GameTickCount - 400)
-                    {
-                        if (W.Cast(EnemyPet.FirstOrDefault()))
-                        {
-                            LastWCast = Core.GameTickCount;
-                            IsHoldingPet = true;
-                        }
-                    }
-                }
-                if (!IsWHolding)
-                {
-                    IsHoldingPet = IsWHolding;
-                }
-                else
-                {
-                    IsHoldingPet = ObjectManager.Get<Obj_AI_Minion>().Any(x => x.IsPet() && x.IsValid && !x.IsDead && x.HasBuff("syndrawbuff") && !x.IsAlly);
-                }
-                if (W.ToggleState.Equals(2))
-                {
-                    W.Range = 950;
-                }
-                else
-                {
-                    W.Range = 925;
-                }
-            };
-            AIHeroClient.OnProcessSpellCast += delegate (Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-            {
-                if (!sender.IsMe) return;
-                switch (args.Slot)
-                {
-                    case SpellSlot.Q:
-                        {
-                            if (E.IsInRange(args.End) && IsCombo && E.IsReady())
-                            {
-                                E.Cast(args.End);
-                                IsCombo = false;
-                            }
-                            else
-                            {
-                                IsCombo = false;
-                            }
-                        }
-                        break;
-                    case SpellSlot.W:
-                        {
-                            if (E.IsInRange(args.End) && IsCombo && E.IsReady() && args.IsToggle)
-                            {
-                                E.Cast(args.End);
-                                IsCombo = false;
-                            }
-                            else
-                            {
-                                IsCombo = false;
-                            }
-                        }
-                        break;
-                    case SpellSlot.E:
-                        {
-                            IsCombo = false;
-                        }
-                        break;
-                }
-            };
         }
 
         #region Creat Menu
@@ -152,9 +64,7 @@ namespace UBAddons.Champions.Syndra
                 Menu.AddGroupLabel("General Setting");
                 Menu.CreatSlotHitChance(SpellSlot.Q);
                 Menu.CreatSlotHitChance(SpellSlot.W);
-                Menu.CreatSlotHitChance(SpellSlot.E);
-                Menu.Add(Variables.AddonName + "Syndra.QE.HitChance", new Slider("EQ hitchance prediction", 80));
-                Menu.Add(Variables.AddonName + "Syndra.QE.Auto.Hit", new Slider("Auto E if stun {0} champ", 3, 1, 6));
+
                 #endregion
 
                 #region Combo
@@ -163,9 +73,8 @@ namespace UBAddons.Champions.Syndra
                     ComboMenu.CreatSlotCheckBox(SpellSlot.Q);
                     ComboMenu.CreatSlotCheckBox(SpellSlot.W);
                     ComboMenu.CreatSlotCheckBox(SpellSlot.E);
-                    ComboMenu.Add(Variables.AddonName + ".QE.Enable", new CheckBox("Use Q-E"));
-                    ComboMenu.Add(Variables.AddonName + ".WE.Enable", new CheckBox("Use W-E"));
                     ComboMenu.CreatSlotCheckBox(SpellSlot.R);
+                    ComboMenu.Add("UBAddons.Lissandra.R.Enemy.Count", new Slider("R my self if more than {0} enmy around me", 3, 1, 6));
                 }
                 #endregion
 
@@ -220,10 +129,10 @@ namespace UBAddons.Champions.Syndra
                 {
                     MiscMenu.AddGroupLabel("Anti Gapcloser settings");
                     MiscMenu.CreatMiscGapCloser();
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.E, "GapCloser");
+                    MiscMenu.CreatSlotCheckBox(SpellSlot.W, "GapCloser");
                     MiscMenu.AddGroupLabel("Interrupter settings");
                     MiscMenu.CreatDangerValueBox();
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.E, "Interrupter");
+                    MiscMenu.CreatSlotCheckBox(SpellSlot.R, "Interrupter");
                     MiscMenu.AddGroupLabel("Killsteal settings");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.Q, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "KillSteal");
@@ -254,123 +163,6 @@ namespace UBAddons.Champions.Syndra
         }
         #endregion
 
-        #region Combo
-        protected static bool CastE(Obj_AI_Base target, bool useQE, bool useWE)
-        {
-            if (target != null && E.IsReady())
-            {
-                switch (E.IsInRange(target))
-                {
-                    case true:
-                        {
-                            var pred = E.GetPrediction(target);
-                            if (pred.CanNext(E, MenuValue.General.EHitChance, true))
-                            {
-                                return E.Cast(pred.CastPosition);
-                            }
-                            return false;
-                        }
-                    case false:
-                        {                           
-                            if (Q.IsReady() && useQE)
-                            {
-                                var pred = EQ.GetPrediction(target);
-                                if (pred.CanNext(EQ, MenuValue.General.EQHitChance, false))
-                                {
-                                    IsCombo = true;
-                                    return Q.Cast(player.Position.Extend(pred.CastPosition, E.Range - 20).To3DWorld());
-                                }
-                            }
-                            else if (W.IsReady() && W.ToggleState == 2 && useWE && IsWHolding)
-                            {
-                                var pred = EQ.GetPrediction(target);
-                                if (pred.CanNext(EQ, MenuValue.General.EQHitChance, false))
-                                {
-                                    IsCombo = true;
-                                    if (W.Cast(player.Position.Extend(pred.CastPosition, E.Range - 20).To3DWorld()))
-                                    {
-                                        LastWCast = Core.GameTickCount;
-                                        return true;
-                                    }
-                                }
-                                return false;
-                            }
-                            return false;
-                        }
-                }
-            }
-            return false;
-        }
-        protected static bool TakeShit_and_Cast(Obj_AI_Base target)
-        {
-            if (W.IsReady())
-            {
-                if (W.ToggleState != 2 && !IsWHolding && LastWCast < Core.GameTickCount - 400)
-                { 
-                    if (Balls.Any(x => W.IsInRange(x)))
-                    {
-                        if (W.Cast(Balls.Where(x => W.IsInRange(x)).FirstOrDefault()))
-                        {
-                            LastWCast = Core.GameTickCount;
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        var minion = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(W.Range) && x.IsEnemy && x != target).FirstOrDefault();
-                        if (minion != null)
-                        {
-                            if (W.Cast(minion))
-                            {
-                                LastWCast = Core.GameTickCount;
-                                return true;
-                            }
-                        }
-                    }
-                }
-                if (/*W.ToggleState == 2 &&*/ IsWHolding && !IsHoldingPet && LastWCast < Core.GameTickCount - 400)
-                {
-                    var pred = W.GetPrediction(target);
-                    if (pred.CanNext(W, MenuValue.General.WHitChance, true))
-                    {
-                        if (W.Cast(pred.CastPosition))
-                        {
-                            LastWCast = Core.GameTickCount;
-                            return true;
-                        }                        
-                    }
-                }
-            }
-            return false;
-        }
-        protected static bool TakeShit_and_Cast(Vector3 position)
-        {
-            if (W.IsReady())
-            {
-                if (W.ToggleState != 2 && !IsWHolding)
-                {
-                    if (Balls.Any())
-                    {
-                        return W.Cast(Balls.FirstOrDefault());
-                    }
-                    else
-                    {
-                        var minion = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(W.Range) && x.IsEnemy).FirstOrDefault();
-                        if (minion != null)
-                        {
-                            return W.Cast(minion);
-                        }
-                    }
-                }
-                if (W.ToggleState == 2 && IsWHolding && !IsHoldingPet)
-                {
-                    W.Cast(position);
-                }
-            }
-            return false;
-        }
-        #endregion
-
         #region Boolean
         protected override bool EnableDraw
         {
@@ -392,18 +184,21 @@ namespace UBAddons.Champions.Syndra
         protected override void OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs args)
         {
             if (sender == null || !sender.IsValidTarget() || !sender.IsEnemy) return;
-            if (E.IsReady() && (MenuValue.Misc.Idiot ? player.Distance(args.End) <= 250 : E.IsInRange(args.End) || sender.IsAttackingPlayer) && MenuValue.Misc.EGap)
+            if (W.IsReady() && (MenuValue.Misc.Idiot ? player.Distance(args.End) <= 250 : W.IsInRange(args.End) || sender.IsAttackingPlayer) && MenuValue.Misc.WGap)
             {
-                CastE(sender, true, true);
+                W.Cast(player);
             }
         }
 
         protected override void OnInterruptable(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs args)
         {
             if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || !MenuValue.Misc.DangerValue.Contains(args.DangerLevel)) return;
-            if (E.IsReady() && MenuValue.Misc.EI && E.IsInRange(sender))
+            if (Q.IsReady() && MenuValue.Misc.QI)
             {
-                CastE(sender, true, true);
+                if (Q.IsInRange(sender))
+                {
+                    Q.Cast(sender);
+                }
             }
         }
 
@@ -426,7 +221,7 @@ namespace UBAddons.Champions.Syndra
                 var predHealth = W.GetHealthPrediction(target);
                 if (predHealth > 0)
                 {
-                    TakeShit_and_Cast(target);
+                    W.Cast();
                 }
             }
             if (args.RemainingHealth <= DamageIndicator.DamageDelegate(target, SpellSlot.E) && MenuValue.LastHit.UseE && E.IsReady() && E.IsInRange(target))
@@ -434,7 +229,7 @@ namespace UBAddons.Champions.Syndra
                 var predHealth = E.GetHealthPrediction(target);
                 if (predHealth > 0)
                 {
-                    E.Cast(target);
+                    CastE(target, false);
                 }
             }
         }
@@ -445,24 +240,21 @@ namespace UBAddons.Champions.Syndra
         #region DamageRaw
         protected static float QDamage(Obj_AI_Base target)
         {
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 50f, 95f, 140f, 185f, 230f }[Q.Level] + 0.75f * player.TotalMagicalDamage);
+            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 70f, 100f, 130f, 160f, 190f }[W.Level] + 0.65f * Player.Instance.TotalMagicalDamage);
         }
 
         protected static float WDamage(Obj_AI_Base target)
         {
-            var raw = new[] { 0f, 70f, 110f, 140f, 190f, 230f }[W.Level] + 0.7f * player.TotalMagicalDamage;
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, raw)
-                + (W.Level.Equals(5) ? raw * 0.2f : 0);
+            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 70f, 110f, 150f, 190f, 230f }[W.Level] + 0.4f * Player.Instance.TotalMagicalDamage);
         }
 
         protected static float EDamage(Obj_AI_Base target)
         {
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 70f, 115f, 160f, 205f, 250f }[E.Level] + 0.5f * player.TotalMagicalDamage);
+            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 70f, 115f, 160f, 205f, 250f }[E.Level] + 0.6f * Player.Instance.TotalMagicalDamage);
         }
         protected static float RDamage(Obj_AI_Base target)
         {
-            int Ball = Player.GetSpell(SpellSlot.R).Ammo;
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, (new[] { 0f, 90f, 135f, 180f }[R.Level] + 0.2f * player.TotalMagicalDamage) * Ball);
+            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 150f, 225f, 350f }[R.Level] + 0.7f * Player.Instance.TotalMagicalDamage);
         }
         #endregion
 
@@ -580,16 +372,11 @@ namespace UBAddons.Champions.Syndra
             {
                 public static int QHitChance { get { return Menu.GetSlotHitChance(SpellSlot.Q); } }
 
-                public static int WHitChance { get { return Menu.GetSlotHitChance(SpellSlot.W); } }
-
                 public static int EHitChance { get { return Menu.GetSlotHitChance(SpellSlot.E); } }
 
-                public static int EQHitChance { get { return Menu.VSliderValue(Variables.AddonName + "Syndra.QE.HitChance"); } }
-
-                public static int EQHit { get { return Menu.VSliderValue(Variables.AddonName + "Syndra.QE.Auto.Hit"); } }
+                public static bool AutoR { get { return Menu.VChecked(Variables.AddonName + ".Lissandra.Auto.R.Turret"); } }
 
             }
-
             internal static class Combo
             {
                 public static bool UseQ { get { return ComboMenu.GetSlotCheckBox(SpellSlot.Q); } }
@@ -598,11 +385,9 @@ namespace UBAddons.Champions.Syndra
 
                 public static bool UseE { get { return ComboMenu.GetSlotCheckBox(SpellSlot.E); } }
 
-                public static bool UseQE { get { return ComboMenu.VChecked(Variables.AddonName + ".QE.Enable"); } }
+                public static bool UseR { get { return ComboMenu.GetSlotCheckBox(SpellSlot.R); } }
 
-                public static bool UseWE { get { return ComboMenu.VChecked(Variables.AddonName + ".WE.Enable"); } }
-
-                public static bool UseEQ { get { return ComboMenu.VChecked(Variables.AddonName + ".EQ.Enable"); } }
+                public static int RHit { get { return ComboMenu.VSliderValue("UBAddons.Lissandra.R.Enemy.Count"); } }
 
             }
 
@@ -611,8 +396,6 @@ namespace UBAddons.Champions.Syndra
                 public static bool UseQ { get { return HarassMenu.GetSlotCheckBox(SpellSlot.Q); } }
 
                 public static bool UseW { get { return HarassMenu.GetSlotCheckBox(SpellSlot.W); } }
-
-                public static int WLogic { get { return HarassMenu.GetSlotComboBox(SpellSlot.W); } }
 
                 public static bool UseE { get { return HarassMenu.GetSlotCheckBox(SpellSlot.E); } }
 
@@ -658,23 +441,17 @@ namespace UBAddons.Champions.Syndra
 
             internal static class LastHit
             {
-                public static bool OnlyFarmMode = LastHitMenu.OnlyFarmMode();
+                public static bool OnlyFarmMode { get { return LastHitMenu.OnlyFarmMode(); } }
 
+                public static bool PreventCombo { get { return LastHitMenu.PreventCombo(); } }
 
-                public static bool PreventCombo = LastHitMenu.PreventCombo();
+                public static bool UseQ { get { return LastHitMenu.GetSlotCheckBox(SpellSlot.Q); } }
 
+                public static bool UseW { get { return LastHitMenu.GetSlotCheckBox(SpellSlot.W); } }
 
-                public static bool UseQ = LastHitMenu.GetSlotCheckBox(SpellSlot.Q);
+                public static bool UseE { get { return LastHitMenu.GetSlotCheckBox(SpellSlot.E); } }
 
-
-                public static bool UseW = LastHitMenu.GetSlotCheckBox(SpellSlot.W);
-
-
-                public static bool UseE = LastHitMenu.GetSlotCheckBox(SpellSlot.E);
-
-
-                public static int ManaLimit = LastHitMenu.GetManaLimit();
-
+                public static int ManaLimit { get { return LastHitMenu.GetManaLimit(); } }
             }
 
             internal static class Misc
@@ -689,15 +466,11 @@ namespace UBAddons.Champions.Syndra
 
                 public static bool Idiot { get { return MiscMenu.PreventIdiotAntiGap(); } }
 
-                public static bool QGap { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.GapCloser.ToString()); } }
-
                 public static bool WGap { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.GapCloser.ToString()); } }
-
-                public static bool EGap { get { return MiscMenu.GetSlotCheckBox(SpellSlot.E, Misc_Menu_Value.GapCloser.ToString()); } }
 
                 public static DangerLevel[] DangerValue { get { return MiscMenu.GetDangerValue(); } }
 
-                public static bool EI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.Interrupter.ToString()); } }
+                public static bool QI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.Interrupter.ToString()); } }
             }
 
             internal static class Drawings

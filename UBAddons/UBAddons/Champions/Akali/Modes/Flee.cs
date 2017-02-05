@@ -1,5 +1,5 @@
 ﻿
-namespace UBMiddle.Champions.Akali.Modes
+namespace UBAddons.Champions.Akali.Modes
 {
     class Flee : Akali
     {

@@ -207,7 +207,7 @@ namespace UBAddons.Champions.Alistar
 
         protected override void OnUnkillableMinion(Obj_AI_Base target, Orbwalker.UnkillableMinionArgs args)
         {
-            if (target == null || target.IsInvulnerable || !target.IsValid) return;
+            if (target == null || target.IsInvulnerable || !target.IsValid || Orbwalker.SupportMode) return;
             if (MenuValue.LastHit.PreventCombo && Orbwalker.ActiveModes.Combo.IsOrb()) return;
             if (MenuValue.LastHit.OnlyFarmMode && !Variables.IsFarm) return;
             if (player.ManaPercent < MenuValue.LastHit.ManaLimit) return;

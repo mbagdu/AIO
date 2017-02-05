@@ -29,10 +29,10 @@ namespace UBAddons.Champions.Lissandra.Modes
             }
             if (MenuValue.Harass.UseE && E.IsReady())
             {
-                var Target = TargetSelector.GetTarget(200, DamageType.Magical, Game.CursorPos);
+                var Target = E.GetGapcloseTarget(200);
                 if (Target != null && E.IsInRange(Target))
                 {
-                    CastE(Target, true);
+                    CastE(Target, false);
                 }
             }
         }

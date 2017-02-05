@@ -1,8 +1,8 @@
 ﻿using EloBuddy.SDK;
 using System.Linq;
-using UBMiddle.Libs;
+using UBAddons.Libs;
 
-namespace UBMiddle.Champions.Chogath.Modes
+namespace UBAddons.Champions.Chogath.Modes
 {
     class Harass : Chogath
     {
