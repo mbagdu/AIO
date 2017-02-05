@@ -2,38 +2,39 @@
 Here is my AIO
 
 ## Avaiable Champ:
+* Ahri
+* Alistar
+* Anivia
+* Annie
+* Brand
+* Cassiopeia
 * Ekko
-* Kennen
-* TF
-* Viktor
-* Zilean
-* Lulu
+* Karma
+* Karthus
 * Kassadin
 * Katarina
-* Ryze
-* Velkoz
-* Karma
-* Cassiopeia
-* Annie
-* Taliyah
-* Anivia
-* Brand
-* Ahri
-* Xerath
 * Kayle
-* Alistar
-* Ziggs
-* Karthus
+* Kennen
+* Lissandra
+* Lulu
 * Orianna
+* Ryze
 * Syndra
-* Veigar
+* Taliyah
+* TF
 * Twitch
+* Veigar
+* Velkoz
+* Viktor
 * Warwick
+* Xerath
+* Ziggs
+* Zilean
+
 
 ## To Do:
 * Gnar
-* Lissandra
-* 11 middle champ remaining
+* 10 middle champ remaining
 * More...
 
 If you wanna to help me develop it, contact me.
