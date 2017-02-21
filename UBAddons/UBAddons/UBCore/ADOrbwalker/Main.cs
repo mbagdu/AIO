@@ -73,21 +73,16 @@ namespace UBAddons.UBCore.ADOrbwalker
 
         public void OnLoad()
         {
-            Initialize();
-        }
-
-        public void Execute()
-        {
-            Force();
-        }
-
-        public static void Initialize()
-        {
             if (Initialized)
             {
                 return;
             }
             Initialized = true;
+        }
+
+        public void Execute()
+        {
+            Force();
         }
     }
 }

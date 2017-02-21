@@ -38,11 +38,24 @@ namespace UBAddons.Champions.Zilean.Modes
                     if (Q.IsReady() && MenuValue.Misc.QKS)
                     {
                         var pred = Q.GetPrediction(target);
-                        Q.Cast(pred.CastPosition);
+                        if (pred.CanNext(Q, MenuValue.General.QHitChance, false))
+                        {
+                            Q.Cast(pred.CastPosition);
+                        }
                     }
                     if (W.IsReady() && !Q.IsReady() && MenuValue.Misc.WKS)
                     {
-                        W.Cast();
+                        if (W.Cast())
+                        {
+                            if (MenuValue.Misc.QKS)
+                            {
+                                var pred = Q.GetPrediction(target);
+                                if (pred.CanNext(Q, MenuValue.General.QHitChance, false))
+                                {
+                                    Q.Cast(pred.CastPosition);
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -15,13 +15,16 @@ namespace UBAddons
         static void Main(string[] args)
         {
             Loading.OnLoadingComplete += Loading_OnLoadingComplete;
-            UpdateChecker.CheckForUpdates();
-            while (UpdateChecker.CurrentVersion == System.Version.Parse("0.0.0.0"))
-            { }
+            UpdateChecker.CheckForUpdates();   
         }
         internal static IHeroBase PluginInstance { get; private set; }
         private static void Loading_OnLoadingComplete(System.EventArgs args)
         {
+            ShowNotification();
+            if (UpdateChecker.CurrentVersion > typeof(UBAddons).Assembly.GetName().Version)
+            {
+                return;
+            }
             LoadPlugin();
             UBCore.CoreMenu.Initialize();
             if (PluginInstance == null)
@@ -49,7 +52,6 @@ namespace UBAddons
 
             PluginInstance = (IHeroBase)Activator.CreateInstance(type);
             Libs.Dictionary.FleeSpell.Initialize();
-            ShowNotification();
             Core.DelayAction(() =>
             {
                 if (Initialize(PluginInstance))

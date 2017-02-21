@@ -19,7 +19,7 @@ namespace UBAddons.Champions.Ahri.Modes
                 if (minion.Any())
                 {
                     var Bestcast = EntityManager.MinionsAndMonsters.GetLineFarmLocation(minion, Q.Width, (int)Q.Range);
-                    if (Bestcast.HitNumber > MenuValue.LaneClear.QHit)
+                    if (Bestcast.HitNumber >= MenuValue.LaneClear.QHit)
                     {
                         Q.Cast(Bestcast.CastPosition);
                     }

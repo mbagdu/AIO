@@ -16,7 +16,8 @@ namespace UBAddons.UBCore.Activator
     {
         internal static void Tiamat()
         {
-            if (!ItemList.Tiamat.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Tiamat"].Cast<GroupLabel>() == null) return;
+            if (!ItemList.Tiamat.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Tiamat"] == null 
+                || Player.Instance.Spellbook.IsChanneling) return;
             var tiamat = ItemList.Tiamat.FirstOrDefault(x => x.IsOwned() && x.IsReady());
             if (Player.HasBuffOfType(BuffType.Invisibility) && Main.AttackMenu.VChecked("Tiamat.Stealth")) return;
             if (Orbwalker.ActiveModes.LaneClear.IsOrb() || Orbwalker.ActiveModes.JungleClear.IsOrb())
@@ -34,7 +35,8 @@ namespace UBAddons.UBCore.Activator
         }
         internal static void Bork()
         {
-            if (!ItemList.Bork.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Bork"].Cast<GroupLabel>() == null) return;
+            if (!ItemList.Bork.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Bork"] == null 
+                || Player.Instance.Spellbook.IsChanneling) return;
             var bork = ItemList.Bork.FirstOrDefault(x => x.IsOwned() && x.IsReady());
             if (!Main.AttackMenu.VChecked("Bork.Enabled")) return;
             if (Player.HasBuffOfType(BuffType.Invisibility) && Main.AttackMenu.VChecked("Bork.Stealth")) return;
@@ -46,7 +48,8 @@ namespace UBAddons.UBCore.Activator
         }
         internal static void Hextech()
         {
-            if (!ItemList.Hextech.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Hextech"].Cast<GroupLabel>() == null) return;
+            if (!ItemList.Hextech.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Hextech"] == null 
+                || Player.Instance.Spellbook.IsChanneling) return;
             var Hextech = ItemList.Hextech.FirstOrDefault(x => x.IsOwned() && x.IsReady());
             if (!Main.AttackMenu.VChecked("Hextech.Enabled")) return;
             if (Player.HasBuffOfType(BuffType.Invisibility) && Main.AttackMenu.VChecked("Hextech.Stealth")) return;
@@ -64,7 +67,7 @@ namespace UBAddons.UBCore.Activator
             if (Player.HasBuffOfType(BuffType.Invisibility) && Main.AttackMenu.VChecked("Tiamat.Stealth")) return;
             if (tiamat.Id.Equals(ItemId.Titanic_Hydra))
             {
-                if (Main.AttackMenu["Titanic_Hydra"].Cast<GroupLabel>() != null && Main.AttackMenu.VComboValue("Titanic_Hydra.Style").Equals(0))
+                if (Main.AttackMenu["Titanic_Hydra"] != null && Main.AttackMenu.VComboValue("Titanic_Hydra.Style").Equals(0))
                 {
                     if (!Orbwalker.ActiveModes.Combo.IsOrb() && Main.AttackMenu.VChecked("Titanic_Hydra.Combo") && target.Health > ItemDamage.TitanicDamage(Target)) return;
                     tiamat.Cast();
@@ -73,7 +76,7 @@ namespace UBAddons.UBCore.Activator
             }
             else
             {
-                if (Main.AttackMenu["Tiamat"].Cast<GroupLabel>() != null && Main.AttackMenu.VComboValue("Tiamat.Style").Equals(0))
+                if (Main.AttackMenu["Tiamat"] != null && Main.AttackMenu.VComboValue("Tiamat.Style").Equals(0))
                 {
                     if (!Orbwalker.ActiveModes.Combo.IsOrb() && Main.AttackMenu.VChecked("Tiamat.Combo") && target.Health > ItemDamage.TiamatDamage(Target)) return;
                     tiamat.Cast();
@@ -89,7 +92,7 @@ namespace UBAddons.UBCore.Activator
             if (Player.HasBuffOfType(BuffType.Invisibility) && Main.AttackMenu.VChecked("Tiamat.Stealth")) return;
             if (tiamat.Id.Equals(ItemId.Titanic_Hydra))
             {
-                if (Main.AttackMenu["Titanic_Hydra"].Cast<GroupLabel>() != null && Main.AttackMenu.VComboValue("Titanic_Hydra.Style").Equals(0))
+                if (Main.AttackMenu["Titanic_Hydra"] != null && Main.AttackMenu.VComboValue("Titanic_Hydra.Style").Equals(0))
                 {
                     if (!Orbwalker.ActiveModes.Combo.IsOrb() && Main.AttackMenu.VChecked("Titanic_Hydra.Combo") && target.Health > ItemDamage.TitanicDamage(Target)) return;
                     tiamat.Cast();
@@ -100,7 +103,7 @@ namespace UBAddons.UBCore.Activator
 
         internal static void OnGapCloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs args)
         {
-            if (!ItemList.Hextech.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Hextech"].Cast<GroupLabel>() == null || sender.IsAlly) return;
+            if (!ItemList.Hextech.Any(x => x.IsOwned() && x.IsReady()) || Main.AttackMenu["Hextech"] == null || sender.IsAlly) return;
             var Hextech = ItemList.Hextech.FirstOrDefault(x => x.IsOwned() && x.IsReady());
             if (!Main.AttackMenu.VChecked("Hextech.Enabled") || !Main.AttackMenu.VChecked("Hextech.AntiGapcloser")) return;
             if (Hextech.Id.Equals(ItemId.Hextech_GLP_800))

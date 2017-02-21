@@ -56,15 +56,18 @@ namespace UBAddons.Champions.Ahri.Modes
                     }
                 }
             }
-            if (LastTurretTarget.IsMe && player.IsUnderEnemyturret())
+            if (LastTurretTarget != null)
             {
-                var spawn = ObjectManager.Get<Obj_SpawnPoint>().Where(x => x.Team == player.Team).First();
-                var haslowhptarget = EntityManager.Heroes.Enemies.Any(x => x.Health < player.GetSpellDamage(x, SpellSlot.R, DamageLibrary.SpellStages.DamagePerStack));
-                if (!haslowhptarget)
+                if (LastTurretTarget.IsMe && player.IsUnderEnemyturret())
                 {
-                    if (R.IsReady() && (player.HasBuff("ahritumble") || R.ToggleState == 2))
+                    var spawn = ObjectManager.Get<Obj_SpawnPoint>().Where(x => x.Team == player.Team).First();
+                    var haslowhptarget = EntityManager.Heroes.Enemies.Any(x => x.Health < player.GetSpellDamage(x, SpellSlot.R, DamageLibrary.SpellStages.DamagePerStack));
+                    if (!haslowhptarget)
                     {
-                        R.Cast(player.Position.Extend(spawn, R.Range).To3DWorld());
+                        if (R.IsReady() && (player.HasBuff("ahritumble") || R.ToggleState == 2))
+                        {
+                            R.Cast(player.Position.Extend(spawn, R.Range).To3DWorld());
+                        }
                     }
                 }
             }

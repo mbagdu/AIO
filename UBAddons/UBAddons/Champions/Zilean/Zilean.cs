@@ -55,7 +55,7 @@ namespace UBAddons.Champions.Zilean
                 #region Mainmenu
                 Menu = MainMenu.AddMenu("UB" + player.Hero, "UBAddons.MainMenu" + player.Hero, "UB" + player.Hero + " - UBAddons - by U.Boruto");
                 Menu.AddGroupLabel("General Setting");
-                Menu.CreatSlotHitChance(SpellSlot.Q);                
+                Menu.CreatSlotHitChance(SpellSlot.Q, 60);                
 
                 #endregion
 

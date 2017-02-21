@@ -9,9 +9,8 @@ namespace UBAddons.Champions.Cassiopeia.Modes
     {
         public static void Execute()
         {
-            if (player.Mana < MenuValue.LaneClear.ManaLimit) return;
-            if (ObjectManager.Get<AIHeroClient>().Any(x => x.IsValid && !x.IsDead && !x.IsZombie && player.IsInRange(x, MenuValue.LaneClear.ScanRange)
-                && MenuValue.LaneClear.EnableIfNoEnemies)) return;
+            if (player.ManaPercent < MenuValue.LaneClear.ManaLimit) return;
+            if (ObjectManager.Get<AIHeroClient>().Any(x => x.IsValidTarget(MenuValue.LaneClear.ScanRange)) && MenuValue.LaneClear.EnableIfNoEnemies) return;
             if (MenuValue.LaneClear.UseQ && Q.IsReady())
             {
                 var Minion = Q.GetLaneMinions(MenuValue.LaneClear.OnlyKillable);

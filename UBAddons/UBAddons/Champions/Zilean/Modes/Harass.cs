@@ -22,7 +22,17 @@ namespace UBAddons.Champions.Zilean.Modes
             }
             if (MenuValue.Harass.UseW && !Q.IsReady(1200) && W.IsReady())
             {
-                W.Cast();
+                if (W.Cast())
+                {
+                    if (MenuValue.Combo.UseQ)
+                    {
+                        var pred = Q.GetPrediction(target);
+                        if (pred.CanNext(Q, MenuValue.General.QHitChance, false))
+                        {
+                            Q.Cast(pred.CastPosition);
+                        }
+                    }
+                }
             }
             if (MenuValue.Harass.UseE && E.IsReady())
             {

@@ -6,47 +6,55 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using System;
 using System.Linq;
-using System.Drawing;
 using UBAddons.General;
 using UBAddons.Libs;
 using UBAddons.Log;
+using Color = System.Drawing.Color;
 
-namespace UBAddons.Champions.Chogath
+namespace UBAddons.Champions.Vi
 {
-    internal class Chogath : ChampionPlugin
+    internal class Vi : ChampionPlugin
     {
         protected static AIHeroClient player = Player.Instance;
-        protected static Spell.Skillshot Q { get; set; }
-        protected static Spell.Skillshot W { get; set; }
+        protected static Spell.Chargeable Q { get; set; }
+        protected static Spell.Active W { get; set; }
         protected static Spell.Active E { get; set; }
+        protected static Spell.Skillshot E2 { get; set; }
         protected static Spell.Targeted R { get; set; }
 
         protected static Menu Menu { get; set; }
         protected static Menu ComboMenu { get; set; }
-        protected static Menu HarassMenu { get; set; }
         protected static Menu LaneClearMenu { get; set; }
         protected static Menu JungleClearMenu { get; set; }
-        protected static Menu MiscMenu { get; set; }
         protected static Menu LastHitMenu { get; set; }
+        protected static Menu MiscMenu { get; set; }
         protected static Menu DrawMenu { get; set; }
 
-        static Chogath()
+        protected static int LastAA;
+        static Vi()
         {
-            Q = new Spell.Skillshot(SpellSlot.Q, DamageType.Magical)
+            var Qfake = new Spell.Skillshot(SpellSlot.Q, DamageType.Physical);
+            Q = new Spell.Chargeable(SpellSlot.Q, 250, Qfake.Range, 1250, Qfake.CastDelay, Qfake.Speed, Qfake.Width, DamageType.Magical)
             {
                 AllowedCollisionCount = int.MaxValue,
             };
+            W = new Spell.Active(SpellSlot.W);
+            E = new Spell.Active(SpellSlot.E, (uint)player.AttackRange + 50, DamageType.Physical);
 
-            W = new Spell.Skillshot(SpellSlot.W, DamageType.Magical)
-            {
-                AllowedCollisionCount = int.MaxValue,
-            };
+            E2 = new Spell.Skillshot(SpellSlot.E, 600, SkillShotType.Linear, 0, 3500, 120, DamageType.Physical);
 
-            E = new Spell.Active(SpellSlot.E);
-
-            R = new Spell.Targeted(SpellSlot.R, 550, DamageType.True);
+            R = new Spell.Targeted(SpellSlot.R, 800, DamageType.Physical);
 
             DamageIndicator.DamageDelegate = HandleDamageIndicator;
+            Orbwalker.OnPostAttack += delegate(AttackableUnit target, EventArgs args)
+            {
+                LastAA = Core.GameTickCount;
+            };
+            Player.OnSpellCast += delegate (Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+            {
+                if (!sender.IsMe || args.Slot != SpellSlot.E) return;
+                Orbwalker.ResetAutoAttack();
+            };
         }
 
         #region Creat Menu
@@ -59,6 +67,8 @@ namespace UBAddons.Champions.Chogath
                 Menu.AddGroupLabel("General Setting");
                 Menu.CreatSlotHitChance(SpellSlot.Q);
                 Menu.CreatSlotHitChance(SpellSlot.W);
+                Menu.CreatSlotHitChance(SpellSlot.E);
+                Menu.CreatSlotHitChance(SpellSlot.R);
 
                 #endregion
 
@@ -68,17 +78,11 @@ namespace UBAddons.Champions.Chogath
                     ComboMenu.CreatSlotCheckBox(SpellSlot.Q);
                     ComboMenu.CreatSlotCheckBox(SpellSlot.W);
                     ComboMenu.CreatSlotCheckBox(SpellSlot.E);
-                }
-                #endregion
-
-                #region Harass
-                HarassMenu = Menu.AddSubMenu("Harass", "UBAddons.HarassMenu" + player.Hero, "Settings your harass below");
-                {
-                    HarassMenu.CreatSlotCheckBox(SpellSlot.Q);
-                    HarassMenu.CreatSlotCheckBox(SpellSlot.W);
-                    HarassMenu.CreatSlotCheckBox(SpellSlot.E);
-                    HarassMenu.CreatManaLimit();
-                    HarassMenu.CreatHarassKeyBind();
+                    ComboMenu.CreatSlotCheckBox(SpellSlot.R, null, false);
+                    foreach (var enemy in EntityManager.Heroes.Enemies)
+                    {
+                        ComboMenu.Add($"UBAdddons.Vi.R.{enemy.ChampionName}", new CheckBox($"Use R on {enemy.ChampionName}"));
+                    }
                 }
                 #endregion
 
@@ -90,8 +94,6 @@ namespace UBAddons.Champions.Chogath
                     LaneClearMenu.CreatSlotHitSlider(SpellSlot.Q, 5, 1, 10);
                     LaneClearMenu.CreatSlotCheckBox(SpellSlot.W, null, false);
                     LaneClearMenu.CreatSlotHitSlider(SpellSlot.W, 5, 1, 10);
-                    LaneClearMenu.CreatSlotCheckBox(SpellSlot.E, null, false);
-                    LaneClearMenu.CreatSlotHitSlider(SpellSlot.E, 5, 1, 10);
                     LaneClearMenu.CreatManaLimit();
                 }
                 #endregion
@@ -101,18 +103,18 @@ namespace UBAddons.Champions.Chogath
                 {
                     JungleClearMenu.CreatSlotCheckBox(SpellSlot.Q);
                     JungleClearMenu.CreatSlotCheckBox(SpellSlot.W);
-                    JungleClearMenu.CreatSlotCheckBox(SpellSlot.E);
+                    JungleClearMenu.CreatSlotCheckBox(SpellSlot.E, null, false);
                     JungleClearMenu.CreatManaLimit();
                 }
                 #endregion
 
-                #region LastHit
+                #region Lasthit
                 LastHitMenu = Menu.AddSubMenu("Lasthit", "UBAddons.Lasthit" + player.Hero, "UB" + player.Hero + " - Settings your unkillable minion below");
                 {
                     LastHitMenu.CreatLasthitOpening();
                     LastHitMenu.CreatSlotCheckBox(SpellSlot.Q);
                     LastHitMenu.CreatSlotCheckBox(SpellSlot.W);
-                    LastHitMenu.CreatSlotCheckBox(SpellSlot.E);
+                    LastHitMenu.CreatSlotCheckBox(SpellSlot.E, null, false);
                     LastHitMenu.CreatManaLimit();
                 }
                 #endregion
@@ -122,17 +124,17 @@ namespace UBAddons.Champions.Chogath
                 {
                     MiscMenu.AddGroupLabel("Anti Gapcloser settings");
                     MiscMenu.CreatMiscGapCloser();
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, "GapCloser");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.W, "GapCloser");
+                    MiscMenu.CreatSlotCheckBox(SpellSlot.E, "GapCloser");
                     MiscMenu.AddGroupLabel("Interrupter settings");
                     MiscMenu.CreatDangerValueBox();
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.Q, "Interrupter");
-                    MiscMenu.CreatSlotCheckBox(SpellSlot.W, "Interrupter");
+                    MiscMenu.CreatSlotCheckBox(SpellSlot.E, "Interrupter");
                     MiscMenu.AddGroupLabel("Killsteal settings");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.Q, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.W, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.E, "KillSteal");
                     MiscMenu.CreatSlotCheckBox(SpellSlot.R, "KillSteal");
+                    MiscMenu.CreatSlotComboBox(SpellSlot.R, 0, "On Tap Key", "Auto");
+                    MiscMenu.Add("UBAddons.Xerath.R.Key", new KeyBind("R key", false, KeyBind.BindTypes.HoldActive, 'R'));
                 }
                 #endregion
 
@@ -140,6 +142,7 @@ namespace UBAddons.Champions.Chogath
                 DrawMenu = Menu.AddSubMenu("Drawings", "UBAddons.Drawings" + player.Hero, "Settings your drawings below");
                 {
                     DrawMenu.CreatDrawingOpening();
+                    DrawMenu.Add("UBAddons.Xerath.Notification.Draw", new CheckBox("Draw notification when can R"));
                     DrawMenu.CreatColorPicker(SpellSlot.Q);
                     DrawMenu.CreatColorPicker(SpellSlot.W);
                     DrawMenu.CreatColorPicker(SpellSlot.E);
@@ -149,7 +152,6 @@ namespace UBAddons.Champions.Chogath
                 #endregion
 
                 DamageIndicator.Initalize(MenuValue.Drawings.ColorDmg);
-
             }
             catch (Exception exception)
             {
@@ -171,40 +173,84 @@ namespace UBAddons.Champions.Chogath
 
         protected override bool IsAutoHarass
         {
-            get { return MenuValue.Harass.IsAuto; }
+            get { return false; }
+        }
+        protected static bool CanCastE
+        {
+            get
+            {
+                return E.IsReady() && Core.GameTickCount - LastAA <= player.AttackDelay * 1000 - 100;
+            }
         }
         #endregion
 
         #region Misc
+        protected static void CastQ(Obj_AI_Base target)
+        {
+            if (target == null) return;
+            if (Q.IsCharging)
+            {
+                var pred = Q.GetPrediction(target);
+                if (pred.CanNext(Q, MenuValue.General.QHitChance, true))
+                {
+                    Q.Cast(pred.CastPosition);
+                }
+            }
+            else
+            {
+                Q.StartCharging();
+            }
+        }
+        protected static void CastE(Obj_AI_Base Target = null)
+        {
+            Orbwalker.ForcedTarget = null;
+            var target = Target ?? E2.GetTarget();
+            if (target == null ) return;
+            if (!player.HasBuff("ViE") && CanCastE)
+            {
+                E.Cast();
+            }
+            var prediction = Prediction.Position.PredictLinearMissile(target, 600, 60, (int)player.AttackDelay, 3500, int.MaxValue, null, true);
+            var Rectangle = new Geometry.Polygon.Rectangle(prediction.UnitPosition, Player.Instance.Position, Q.Width);
+            var Collision = prediction.CollisionObjects.Where(x => x.IsValidTarget() && x.IsEnemy).OrderBy(x => x.Distance(Rectangle.Start) + x.Distance(Rectangle.End));
+            var collisiontarget = new Obj_AI_Base();
+            if (Collision != null)
+            {
+                foreach (var obj in Collision)
+                {
+                    collisiontarget = null;
+                    var Hitbox = new Geometry.Polygon.Rectangle(Player.Instance.Position.To2D(), Player.Instance.Position.Extend(obj.Position, 600), 120f);
+                    if (Hitbox.IsInside(prediction.CastPosition) && Q.IsInRange(obj))
+                    {
+                        collisiontarget = obj;
+                        break;
+                    }
+                }
+            }
+            if (collisiontarget != null && collisiontarget != new Obj_AI_Base())
+            {
+                Orbwalker.ForcedTarget = collisiontarget;
+            }
+        }
         protected override void OnGapcloser(AIHeroClient sender, Gapcloser.GapcloserEventArgs args)
         {
             if (sender == null || !sender.IsValidTarget() || !sender.IsEnemy) return;
-            if (Q.IsReady() && (MenuValue.Misc.Idiot ? player.Distance(args.End) <= 250 : Q.IsInRange(args.End) || sender.IsAttackingPlayer) && MenuValue.Misc.QGap)
+            if (MenuValue.Misc.QGap && Q.IsReady() && (MenuValue.Misc.Idiot ? player.Distance(args.End) <= 250 : Q.IsInRange(args.End) || sender.IsAttackingPlayer))
             {
-                Q.Cast(sender);
-            }
-            if (W.IsReady() && (MenuValue.Misc.Idiot ? player.Distance(args.End) <= 250 : W.IsInRange(args.End) || sender.IsAttackingPlayer) && MenuValue.Misc.WGap)
-            {
-                W.Cast(sender);
+                CastQ(sender);
             }
         }
 
         protected override void OnInterruptable(Obj_AI_Base sender, Interrupter.InterruptableSpellEventArgs args)
         {
-            if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || !MenuValue.Misc.DangerValue.Contains(args.DangerLevel)) return;
-            if (Q.IsReady() && MenuValue.Misc.QI)
+            if (sender == null || !sender.IsEnemy || !sender.IsValidTarget() || !MenuValue.Misc.dangerValue.Contains(args.DangerLevel)) return;
+            if (Q.IsReady() && MenuValue.Misc.QI && Q.IsInRange(sender))
             {
-                if (Q.IsInRange(sender))
-                {
-                    Q.Cast(sender);
-                }
+                CastQ(sender);
             }
-            if (W.IsReady() && MenuValue.Misc.WI)
+            else if (R.IsReady() && MenuValue.Misc.RI && R.IsInRange(sender))
             {
-                if (W.IsInRange(sender))
-                {
-                    W.Cast(sender);
-                }
+                R.Cast(sender);
             }
         }
 
@@ -217,18 +263,12 @@ namespace UBAddons.Champions.Chogath
             if (args.RemainingHealth <= DamageIndicator.DamageDelegate(target, SpellSlot.Q) && MenuValue.LastHit.UseQ && Q.IsReady() && Q.IsInRange(target))
             {
                 var predHealth = Q.GetHealthPrediction(target);
-                if (predHealth > 0)
-                {
-                    Q.Cast(target);
-                }
+                if (predHealth < float.Epsilon) return;
+                CastQ(target);
             }
-            if (args.RemainingHealth <= DamageIndicator.DamageDelegate(target, SpellSlot.W) && MenuValue.LastHit.UseW && W.IsReady() && W.IsInRange(target))
+            if (args.RemainingHealth <= DamageIndicator.DamageDelegate(target, SpellSlot.E) && MenuValue.LastHit.UseE && E.IsReady() && E.IsInRange(target))
             {
-                var predHealth = W.GetHealthPrediction(target);
-                if (predHealth > 0)
-                {
-                    W.Cast(target);
-                }
+                CastE(target);
             }
         }
         #endregion
@@ -236,23 +276,26 @@ namespace UBAddons.Champions.Chogath
         #region Damage
 
         #region DamageRaw
-        protected static float QDamage(Obj_AI_Base target)
+        public static float QDamage(Obj_AI_Base target)
         {
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 80f, 135f, 190f, 245f, 305f }[Q.Level] + Player.Instance.TotalMagicalDamage);
+            return player.GetSpellDamage(target, SpellSlot.Q);
         }
+        public static float WDamage(Obj_AI_Base target)
+        {
+            if (target.GetBuffCount("viwproc") >= 2)
+            {
+                return player.CalculateDamageOnUnit(target, DamageType.Magical, (new[] { 0f, 0.04f, 0.055f, 0.07f, 0.085f, 0.1f }[W.Level] + (1f / 35f) * player.FlatPhysicalDamageMod) * target.MaxHealth);
+            }
+            return 0;
+        }
+        public static float EDamage(Obj_AI_Base target)
+        {
+            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 10f, 30f, 50f, 70f, 90f }[E.Level] + 1.15f * player.TotalAttackDamage + 0.7f * player.TotalMagicalDamage);
+        }
+        public static float RDamage(Obj_AI_Base target)
+        {
 
-        protected static float WDamage(Obj_AI_Base target)
-        {
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 75f, 125f, 175f, 225f, 275f }[W.Level] + 0.7f * Player.Instance.TotalMagicalDamage);
-        }
-
-        protected static float EDamage(Obj_AI_Base target)
-        {
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 20f, 35f, 50f, 65f, 80f }[E.Level] + 0.3f * Player.Instance.TotalMagicalDamage);
-        }
-        protected static float RDamage(Obj_AI_Base target)
-        {
-            return player.CalculateDamageOnUnit(target, DamageType.True, new[] { 0f, 300f, 475f, 650f }[R.Level] + 0.7f * Player.Instance.TotalMagicalDamage);
+            return player.CalculateDamageOnUnit(target, DamageType.Magical, (new[] { 0f, 150f, 300f, 450f }[R.Level] + 1.4f * player.FlatPhysicalDamageMod));
         }
         #endregion
 
@@ -276,7 +319,7 @@ namespace UBAddons.Champions.Chogath
                     {
                         float damage = 0f;
 
-                        if (Q.IsReady())
+                        if (Q.IsReady() || (Q.IsInRange(target) && Q.IsCharging))
                         {
                             damage = damage + QDamage(target);
                         }
@@ -288,7 +331,7 @@ namespace UBAddons.Champions.Chogath
                         {
                             damage = damage + EDamage(target);
                         }
-                        if (R.IsReady())
+                        if (R.IsReady() || player.Spellbook.IsChanneling)
                         {
                             damage = damage + RDamage(target);
                         }
@@ -346,11 +389,15 @@ namespace UBAddons.Champions.Chogath
             if (!MenuValue.Drawings.EnableDraw) return;
             if (MenuValue.Drawings.DrawQ && (!MenuValue.Drawings.ReadyQ || Q.IsReady()))
             {
-                Q.DrawRange(MenuValue.Drawings.ColorQ);
-            }
-            if (MenuValue.Drawings.DrawW && (!MenuValue.Drawings.ReadyW || W.IsReady()))
-            {
-                W.DrawRange(MenuValue.Drawings.ColorW);
+                if (Q.IsCharging)
+                {
+                    Q.DrawRange(MenuValue.Drawings.ColorQ);
+                }
+                else
+                {
+                    player.DrawCircle((int)Q.MinimumRange, MenuValue.Drawings.ColorQ);
+                    player.DrawCircle((int)Q.MaximumRange, MenuValue.Drawings.ColorQ);
+                }
             }
             if (MenuValue.Drawings.DrawE && (!MenuValue.Drawings.ReadyE || E.IsReady()))
             {
@@ -369,10 +416,8 @@ namespace UBAddons.Champions.Chogath
             internal static class General
             {
                 public static int QHitChance { get { return Menu.GetSlotHitChance(SpellSlot.Q); } }
-
-                public static int WHitChance { get { return Menu.GetSlotHitChance(SpellSlot.W); } }
-
             }
+
             internal static class Combo
             {
                 public static bool UseQ { get { return ComboMenu.GetSlotCheckBox(SpellSlot.Q); } }
@@ -381,19 +426,9 @@ namespace UBAddons.Champions.Chogath
 
                 public static bool UseE { get { return ComboMenu.GetSlotCheckBox(SpellSlot.E); } }
 
-            }
+                public static bool UseR { get { return ComboMenu.GetSlotCheckBox(SpellSlot.R); } }
 
-            internal static class Harass
-            {
-                public static bool UseQ { get { return HarassMenu.GetSlotCheckBox(SpellSlot.Q); } }
-
-                public static bool UseW { get { return HarassMenu.GetSlotCheckBox(SpellSlot.W); } }
-
-                public static bool UseE { get { return HarassMenu.GetSlotCheckBox(SpellSlot.E); } }
-
-                public static int ManaLimit { get { return HarassMenu.GetManaLimit(); } }
-
-                public static bool IsAuto { get { return HarassMenu.GetHarassKeyBind(); } }
+                public static bool UseROn (AIHeroClient hero) { return ComboMenu.VChecked($"UBAddons.Vi.R.{hero.ChampionName}"); }
             }
 
             internal static class LaneClear
@@ -406,15 +441,11 @@ namespace UBAddons.Champions.Chogath
 
                 public static bool UseQ { get { return LaneClearMenu.GetSlotCheckBox(SpellSlot.Q); } }
 
-                public static int QHit { get { return LaneClearMenu.GetSlotHitSlider(SpellSlot.Q); } }
+                public static int Qhit { get { return LaneClearMenu.GetSlotHitSlider(SpellSlot.Q); } }
 
-                public static bool UseW { get { return LaneClearMenu.GetSlotCheckBox(SpellSlot.W); } }
+                public static bool UseE { get { return LaneClearMenu.GetSlotCheckBox(SpellSlot.W); } }
 
-                public static int WHit { get { return LaneClearMenu.GetSlotHitSlider(SpellSlot.W); } }
-
-                public static bool UseE { get { return LaneClearMenu.GetSlotCheckBox(SpellSlot.E); } }
-
-                public static int EHit { get { return LaneClearMenu.GetSlotHitSlider(SpellSlot.E); } }
+                public static int Ehit { get { return LaneClearMenu.GetSlotHitSlider(SpellSlot.W); } }
 
                 public static int ManaLimit { get { return LaneClearMenu.GetManaLimit(); } }
             }
@@ -423,8 +454,6 @@ namespace UBAddons.Champions.Chogath
             {
 
                 public static bool UseQ { get { return JungleClearMenu.GetSlotCheckBox(SpellSlot.Q); } }
-
-                public static bool UseW { get { return JungleClearMenu.GetSlotCheckBox(SpellSlot.W); } }
 
                 public static bool UseE { get { return JungleClearMenu.GetSlotCheckBox(SpellSlot.E); } }
 
@@ -439,8 +468,6 @@ namespace UBAddons.Champions.Chogath
 
                 public static bool UseQ { get { return LastHitMenu.GetSlotCheckBox(SpellSlot.Q); } }
 
-                public static bool UseW { get { return LastHitMenu.GetSlotCheckBox(SpellSlot.W); } }
-
                 public static bool UseE { get { return LastHitMenu.GetSlotCheckBox(SpellSlot.E); } }
 
                 public static int ManaLimit { get { return LastHitMenu.GetManaLimit(); } }
@@ -450,7 +477,7 @@ namespace UBAddons.Champions.Chogath
             {
                 public static bool QKS { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.KillSteal.ToString()); } }
 
-                public static bool WKS { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.KillSteal.ToString()); } }
+                public static bool EKS { get { return MiscMenu.GetSlotCheckBox(SpellSlot.E, Misc_Menu_Value.KillSteal.ToString()); } }
 
                 public static bool RKS { get { return MiscMenu.GetSlotCheckBox(SpellSlot.R, Misc_Menu_Value.KillSteal.ToString()); } }
 
@@ -458,13 +485,11 @@ namespace UBAddons.Champions.Chogath
 
                 public static bool QGap { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.GapCloser.ToString()); } }
 
-                public static bool WGap { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.GapCloser.ToString()); } }
-
-                public static DangerLevel[] DangerValue { get { return MiscMenu.GetDangerValue(); } }
+                public static DangerLevel[] dangerValue { get { return MiscMenu.GetDangerValue(); } }
 
                 public static bool QI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.Q, Misc_Menu_Value.Interrupter.ToString()); } }
 
-                public static bool WI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.W, Misc_Menu_Value.Interrupter.ToString()); } }
+                public static bool RI { get { return MiscMenu.GetSlotCheckBox(SpellSlot.R, Misc_Menu_Value.Interrupter.ToString()); } }
 
             }
 
@@ -478,12 +503,6 @@ namespace UBAddons.Champions.Chogath
                 public static bool ReadyQ { get { return DrawMenu.GetOnlyReady(SpellSlot.Q); } }
 
                 public static SharpDX.Color ColorQ { get { return DrawMenu.GetColorPicker(SpellSlot.Q).ToSharpDX(); } }
-
-                public static bool DrawW { get { return DrawMenu.GetDrawCheckValue(SpellSlot.W); } }
-
-                public static bool ReadyW { get { return DrawMenu.GetOnlyReady(SpellSlot.W); } }
-
-                public static SharpDX.Color ColorW { get { return DrawMenu.GetColorPicker(SpellSlot.W).ToSharpDX(); } }
 
                 public static bool DrawE { get { return DrawMenu.GetDrawCheckValue(SpellSlot.E); } }
 

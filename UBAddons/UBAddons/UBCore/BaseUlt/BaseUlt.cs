@@ -105,7 +105,7 @@ namespace UBAddons.UBCore.BaseUlt
                         }
                         else
                         {
-                            BaseMenu.AddLabel(Player.Instance.ChampionName + " is not supported yet");
+                            BaseMenu.AddLabel(Player.Instance.ChampionName + " is not supported yet", 90);
                         }
                     }
                     TextureDraw.Initialize();
@@ -307,21 +307,16 @@ namespace UBAddons.UBCore.BaseUlt
 
         public void OnLoad()
         {
-            Initialize();
-        }
-
-        public void Execute()
-        {
-            Game_OnUpdate();
-        }
-
-        private static void Initialize()
-        {
             if (Initialized)
             {
                 return;
             }
             Initialized = true;
+        }
+
+        public void Execute()
+        {
+            Game_OnUpdate();
         }
     }
 }

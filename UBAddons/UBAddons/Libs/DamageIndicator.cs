@@ -21,11 +21,11 @@ namespace UBAddons.Libs
             Color = color;
             Drawing.OnEndScene += DrawingOnEndScene;
         }
-        public static void InitalizeOnMonster(Color color)
-        {
-            Color = color;
-            Drawing.OnEndScene += DrawingOnEndScene;
-        }
+        //public static void InitalizeOnMonster(Color color)
+        //{
+        //    Color = color;
+        //    Drawing.OnEndScene += DrawingOnEndScene;
+        //}
         private static void DrawingOnEndScene(EventArgs args)
         {
             if (!UBAddons.PluginInstance.EnableDraw || !UBAddons.PluginInstance.EnableDamageIndicator) return;

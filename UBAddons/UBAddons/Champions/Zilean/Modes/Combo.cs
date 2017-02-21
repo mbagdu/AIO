@@ -21,7 +21,17 @@ namespace UBAddons.Champions.Zilean.Modes
             }
             if (MenuValue.Combo.UseW && !Q.IsReady(800) && W.IsReady())
             {
-                W.Cast();
+                if (W.Cast())
+                {
+                    if (MenuValue.Combo.UseQ)
+                    {
+                        var pred = Q.GetPrediction(target);
+                        if (pred.CanNext(Q, MenuValue.General.QHitChance, false))
+                        {
+                            Q.Cast(pred.CastPosition);
+                        }
+                    }
+                }
             }
             if (MenuValue.Combo.UseE && E.IsReady())
             {
@@ -34,7 +44,7 @@ namespace UBAddons.Champions.Zilean.Modes
                             {
                                 E.Cast(player);
                             }
-                            else
+                            else if (Etar != null)
                             {
                                 if (W.IsReady() && !player.HasBuff("TimeWarp"))
                                 {
@@ -45,21 +55,6 @@ namespace UBAddons.Champions.Zilean.Modes
                                     E.Cast(target);
                                 }
                             }
-                            //if (Etar == null)
-                            //{
-                            //    E.Cast(player);
-                            //}
-                            //else
-                            //{
-                            //    if (player.IsFacing(Etar))
-                            //    {
-                            //        E.Cast(Etar);
-                            //    }
-                            //    else
-                            //    {
-                            //        E.Cast(player);
-                            //    }
-                            //}
                         }
                         break;
                     case 1:

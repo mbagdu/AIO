@@ -86,8 +86,9 @@ namespace UBAddons.UBCore.Activator
             #endregion
 
             #region Utility
-            Utility.Add(new Item(ItemId.Redemption, 550));
+            Utility.Add(new Item(ItemId.Redemption, 2000));
             Utility.Add(new Item(ItemId.Youmuus_Ghostblade));
+            Utility.Add(new Item(ItemId.Edge_of_Night));
             //Utility.Add(new Item(ItemId.Talisman_of_Ascension));
             //Utility.Add(new Item(ItemId.Righteous_Glory));
             Stack.Add(new Item(ItemId.Tear_of_the_Goddess));

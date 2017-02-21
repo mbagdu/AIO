@@ -308,7 +308,7 @@ namespace UBAddons.Champions.Lissandra
             if (sender == null || !sender.IsValidTarget() || !sender.IsEnemy) return;
             if (W.IsReady() && (MenuValue.Misc.Idiot ? player.Distance(args.End) <= 250 : W.IsInRange(args.End) || sender.IsAttackingPlayer) && MenuValue.Misc.WGap)
             {
-                W.Cast(player);
+                W.Cast();
             }
         }
 
@@ -362,7 +362,7 @@ namespace UBAddons.Champions.Lissandra
         #region DamageRaw
         protected static float QDamage(Obj_AI_Base target)
         {
-            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 70f, 100f, 130f, 160f, 190f }[W.Level] + 0.65f * Player.Instance.TotalMagicalDamage);
+            return player.CalculateDamageOnUnit(target, DamageType.Magical, new[] { 0f, 70f, 100f, 130f, 160f, 190f }[Q.Level] + 0.65f * Player.Instance.TotalMagicalDamage);
         }
 
         protected static float WDamage(Obj_AI_Base target)

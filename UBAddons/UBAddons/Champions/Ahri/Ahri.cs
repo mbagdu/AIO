@@ -40,7 +40,7 @@ namespace UBAddons.Champions.Ahri
             {
                 AllowedCollisionCount = int.MaxValue
             };
-            W = new Spell.Active(SpellSlot.W, 750, DamageType.Physical);
+            W = new Spell.Active(SpellSlot.W, 700, DamageType.Physical);
             E = new Spell.Skillshot(SpellSlot.E, DamageType.Magical);
             R = new Spell.Skillshot(SpellSlot.R, 450, SkillShotType.Circular, 0, 1400, 600, DamageType.Magical)
             {
@@ -80,7 +80,7 @@ namespace UBAddons.Champions.Ahri
                     var xxx = Variables.AddonName + "." + player.Hero;
                     DashMenu.CreatSlotComboBox(SpellSlot.R, 0, "To Mouse", "To Side", "To Target");
                     DashMenu.Add(xxx + ".Dash.Dangerous", new CheckBox("Dangerous Check"));
-                    DashMenu.Add(xxx + ".Dash.Wall", new CheckBox("Check Wall"));
+                    //DashMenu.Add(xxx + ".Dash.Wall", new CheckBox("Check Wall"));
                     DashMenu.Add(xxx + ".Dash.Correct", new CheckBox("Allow Correct the Direction"));
                     DashMenu.Add(xxx + ".Dash.TryE", new CheckBox("Try R for E"));
                     DashMenu.AddLabel("Try R for E only avaiable for To Side");
@@ -127,7 +127,6 @@ namespace UBAddons.Champions.Ahri
                 JungleClearMenu = Menu.AddSubMenu("JungleClear", Variables.AddonName + ".JungleClear" + player.Hero, "Settings your jungleclear below");
                 {
                     JungleClearMenu.CreatSlotCheckBox(SpellSlot.Q);
-                    JungleClearMenu.CreatSlotHitSlider(SpellSlot.Q, 1, 1, 6);
                     JungleClearMenu.CreatSlotCheckBox(SpellSlot.W);
                     JungleClearMenu.CreatSlotCheckBox(SpellSlot.E, null, false);
                     JungleClearMenu.CreatManaLimit();
@@ -222,25 +221,25 @@ namespace UBAddons.Champions.Ahri
                 var pos = new Vector3();
                 if (MenuValue.DashLogic.CheckDangerous)
                 {
-                    if (MenuValue.DashLogic.CheckWall)
-                    {
-                        var Fragment = R.Range / 9;
-                        for (var i = 1; i <= 9; i++)
-                        {
-                            if (player.Position.Extend(input, i * Fragment).IsWall())
-                            {
-                                if (MenuValue.DashLogic.CorrectVector)
-                                {
-                                    pos = player.Position.Extend(input, (i - 1) * Fragment).To3DWorld();
-                                }
-                                else
-                                {
-                                    pos = new Vector3();
-                                }
-                                break;
-                            }                                
-                        }
-                    }
+                    //if (MenuValue.DashLogic.CheckWall)
+                    //{
+                    //    var Fragment = R.Range / 9;
+                    //    for (var i = 1; i <= 9; i++)
+                    //    {
+                    //        if (player.Position.Extend(input, i * Fragment).IsWall())
+                    //        {
+                    //            if (MenuValue.DashLogic.CorrectVector)
+                    //            {
+                    //                pos = player.Position.Extend(input, (i - 1) * Fragment).To3DWorld();
+                    //            }
+                    //            else
+                    //            {
+                    //                pos = new Vector3();
+                    //            }
+                    //            break;
+                    //        }                                
+                    //    }
+                    //}
                     if (input.IsUnderEnemyTurret())
                     {
                         switch (MenuValue.DashLogic.TurretLogics)
@@ -277,7 +276,7 @@ namespace UBAddons.Champions.Ahri
                         }
                         
                     }
-                    if (input.CountEnemyChampionsInRange(1000) > input.CountAllyChampionsInRange(1000) && !CanKillWithCombo)
+                    if (input.CountEnemyChampionsInRange(1000) > input.CountAllyChampionsInRange(1000) && (!CanKillWithCombo && !player.HasBuff("AhriTumble")))
                     {
                         pos = new Vector3();
                     }
@@ -368,14 +367,15 @@ namespace UBAddons.Champions.Ahri
                 }
                 else
                 {
-                    if (R.ToggleState == 2)
+                    if (R.IsReady() && player.HasBuff("AhriTumble"))
                     {
                         return raw * player.GetBuffCount("AhriTumble");
-                    }
-                    else
+                    }                   
+                    if (!player.HasBuff("AhriTumble"))
                     {
                         return raw * 3;
                     }
+                    return 0;
                 }
             }
             else
@@ -492,15 +492,15 @@ namespace UBAddons.Champions.Ahri
             {
                 Q.DrawRange(MenuValue.Drawings.ColorQ);
             }
-            if (MenuValue.Drawings.DrawW && (MenuValue.Drawings.ReadyW) || W.IsReady())
+            if (MenuValue.Drawings.DrawW && (!MenuValue.Drawings.ReadyW) || W.IsReady())
             {
                 W.DrawRange(MenuValue.Drawings.ColorW);
             }
-            if (MenuValue.Drawings.DrawE && (MenuValue.Drawings.ReadyE) || E.IsReady())
+            if (MenuValue.Drawings.DrawE && (!MenuValue.Drawings.ReadyE) || E.IsReady())
             {
                 E.DrawRange(MenuValue.Drawings.ColorE);
             }
-            if (MenuValue.Drawings.DrawR && (MenuValue.Drawings.ReadyR) || R.IsReady())
+            if (MenuValue.Drawings.DrawR && (!MenuValue.Drawings.ReadyR) || R.IsReady())
             {
                 R.DrawRange(MenuValue.Drawings.ColorR);
             }
@@ -525,7 +525,7 @@ namespace UBAddons.Champions.Ahri
 
                 public static bool CheckDangerous { get { return DashMenu.VChecked(conststring + ".Dash.Dangerous"); } }
 
-                public static bool CheckWall { get { return DashMenu.VChecked(conststring + ".Dash.Wall"); } }
+                //public static bool CheckWall { get { return DashMenu.VChecked(conststring + ".Dash.Wall"); } }
 
                 public static bool CorrectVector { get { return DashMenu.VChecked(conststring + ".Dash.Correct"); } }
 
@@ -582,8 +582,6 @@ namespace UBAddons.Champions.Ahri
             internal static class JungleClear
             {
                 public static bool UseQ { get { return JungleClearMenu.GetSlotCheckBox(SpellSlot.Q); } }
-
-                public static int QHit { get { return JungleClearMenu.GetSlotHitSlider(SpellSlot.Q); } }
 
                 public static bool UseW { get { return JungleClearMenu.GetSlotCheckBox(SpellSlot.W); } }
 

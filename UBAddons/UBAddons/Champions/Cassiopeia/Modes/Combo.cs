@@ -63,12 +63,12 @@ namespace UBAddons.Champions.Cassiopeia.Modes
                             }
                         }
                     }
-                    else
+                }
+                else
+                {
+                    if (EntityManager.Heroes.Enemies.Any(x => x.IsValidTarget() && x.IsFacing(player)))
                     {
-                        if (target.IsFacing(player))
-                        {
-                            R.CastIfItWillHit(MenuValue.Combo.RHit, MenuValue.General.RHitChance);
-                        }
+                        R.CastIfItWillHit(MenuValue.Combo.RHit, MenuValue.General.RHitChance);
                     }
                 }
             }

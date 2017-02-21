@@ -444,63 +444,31 @@ namespace UBAddons.Libs
         }
         public static AIHeroClient GetTarget(this Spell.Chargeable spell, IEnumerable<AIHeroClient> YourTarget, TargetSeclect ifnull = TargetSeclect.LeastHP)
         {
-            if (spell.IsCharging)
+            var correct = YourTarget.Where(x => x.IsValidTarget(spell.MaximumRange, false, spell.RangeCheckSource));
+            var lastTarget = TargetSelector.GetTarget(correct, spell.DamageType);
+            if (lastTarget == null)
             {
-                var correct = YourTarget.Where(x => x.IsValidTarget(spell.Range, false, spell.RangeCheckSource));
-                var lastTarget = TargetSelector.GetTarget(correct, spell.DamageType);
-                if (lastTarget == null)
+                switch (ifnull)
                 {
-                    switch (ifnull)
-                    {
-                        case TargetSeclect.SpellTarget:
-                            {
-                                return spell.GetTarget();
-                            };
-                        case TargetSeclect.LeastHP:
-                            {
-                                return EntityManager.Heroes.Enemies.Where(x => x.IsValidTarget(spell.Range, false, spell.RangeCheckSource)).OrderBy(x => x.Health).FirstOrDefault();
-                            };
-                        case TargetSeclect.Default:
-                            {
-                                return lastTarget;
-                            };
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(ifnull));
-                    }
-                }
-                else
-                {
-                    return lastTarget;
+                    case TargetSeclect.SpellTarget:
+                        {
+                            return spell.GetTarget();
+                        };
+                    case TargetSeclect.LeastHP:
+                        {
+                            return EntityManager.Heroes.Enemies.Where(x => x.IsValidTarget(spell.MaximumRange, false, spell.RangeCheckSource)).OrderBy(x => x.Health).FirstOrDefault();
+                        };
+                    case TargetSeclect.Default:
+                        {
+                            return lastTarget;
+                        };
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(ifnull));
                 }
             }
             else
             {
-                var correct = YourTarget.Where(x => x.IsValidTarget(spell.MaximumRange, false, spell.RangeCheckSource));
-                var lastTarget = TargetSelector.GetTarget(correct, spell.DamageType);
-                if (lastTarget == null)
-                {
-                    switch (ifnull)
-                    {
-                        case TargetSeclect.SpellTarget:
-                            {
-                                return spell.GetTarget();
-                            };
-                        case TargetSeclect.LeastHP:
-                            {
-                                return EntityManager.Heroes.Enemies.Where(x => x.IsValidTarget(spell.MaximumRange, false, spell.RangeCheckSource)).OrderBy(x => x.Health).FirstOrDefault();
-                            };
-                        case TargetSeclect.Default:
-                            {
-                                return lastTarget;
-                            };
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(ifnull));
-                    }
-                }
-                else
-                {
-                    return lastTarget;
-                }
+                return lastTarget;
             }
         }
         public static AIHeroClient GetGapcloseTarget(this Spell.SpellBase spell, int Rangetoget)
@@ -509,6 +477,22 @@ namespace UBAddons.Libs
             if (target != null)
             {
                 if (spell.IsInRange(target))
+                {
+                    return target;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
+        public static AIHeroClient GetGapcloseTarget(this Spell.Chargeable spell, int Rangetoget)
+        {
+            var target = TargetSelector.GetTarget(Rangetoget, spell.DamageType, Game.CursorPos);
+            if (target != null)
+            {
+                if (target.Distance(spell.SourcePosition??Player.Instance.Position) < spell.MaximumRange)
                 {
                     return target;
                 }
@@ -583,7 +567,7 @@ namespace UBAddons.Libs
         public static bool CanNext(this PredictionResult pred, Spell.Chargeable spell, int percentHit, bool ignoreYasuoWall)
         {
             return (spell.IsReady() || spell.IsCharging)
-                && spell.Range != spell.MaximumRange ? Player.Instance.Position.IsInRange(pred.CastPosition, spell.Range - 150) : spell.IsInRange(pred.CastPosition)
+                && spell.Range != spell.MaximumRange ? Player.Instance.Position.IsInRange(pred.CastPosition, spell.Range - 250) : spell.IsInRange(pred.CastPosition)
                 && pred.HitChancePercent >= percentHit
                 && (Prediction.Position.Collision.GetYasuoWallCollision(spell.SourcePosition.GetValueOrDefault(Player.Instance.Position), pred.CastPosition) == Vector3.Zero || ignoreYasuoWall);
         }

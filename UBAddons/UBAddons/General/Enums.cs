@@ -35,6 +35,14 @@
         Fire,
         Gun
     }
+    public enum Blocktype
+    {
+        Zhonya,
+        SpellsShield,
+        Exhaust,
+        Shield,
+        All,
+    }
     public enum SpellsSlot
     {
         Passive,

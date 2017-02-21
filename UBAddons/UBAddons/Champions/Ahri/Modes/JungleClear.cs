@@ -10,7 +10,11 @@ namespace UBAddons.Champions.Ahri.Modes
             if (player.ManaPercent < MenuValue.JungleClear.ManaLimit) return;
             if (MenuValue.JungleClear.UseQ && Q.IsReady())
             {
-                Q.CastOnBestFarmPosition(MenuValue.JungleClear.QHit, MenuValue.General.QHitChance);
+                var JungleMob = Q.GetJungleMobs();
+                if (JungleMob.Any())
+                {
+                    Q.Cast(JungleMob.First());
+                }
             }
             if (MenuValue.JungleClear.UseW && W.IsReady())
             {

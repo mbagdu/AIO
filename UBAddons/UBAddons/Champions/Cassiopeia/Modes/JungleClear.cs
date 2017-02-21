@@ -7,7 +7,7 @@ namespace UBAddons.Champions.Cassiopeia.Modes
     {
         public static void Execute()
         {
-            if (player.Mana < MenuValue.JungleClear.ManaLimit) return;
+            if (player.ManaPercent < MenuValue.JungleClear.ManaLimit) return;
             if (MenuValue.JungleClear.UseQ && Q.IsReady())
             {
                 var JungleMob = Q.GetJungleMobs();

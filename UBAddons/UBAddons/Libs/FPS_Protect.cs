@@ -20,10 +20,8 @@ namespace UBAddons.Libs
                 return true;
             }
             var rate = UBCore.CoreMenu.Core.VSliderValue("Core.Calculate");
-            if (Game.FPS < UBCore.CoreMenu.Core.VSliderValue("Core.Min.FPS"))
-            {
-                rate = Math.Min(10, UBCore.CoreMenu.Core.VSliderValue("Core.Calculate"));
-            }
+            if (Game.FPS >= UBCore.CoreMenu.Core.VSliderValue("Core.Min.FPS")) return true;
+            rate = UBCore.CoreMenu.Core.VSliderValue("Core.Calculate");
             if (Delay >= 1000f / rate)
             {
                 return true;

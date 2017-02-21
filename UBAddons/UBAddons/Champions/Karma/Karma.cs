@@ -189,7 +189,7 @@ namespace UBAddons.Champions.Karma
         }
         internal static float WDamage(Obj_AI_Base target)
         {
-            return player.GetSpellDamage(target, SpellSlot.E, DamageLibrary.SpellStages.Default);
+            return player.GetSpellDamage(target, SpellSlot.W, DamageLibrary.SpellStages.Default);
         }
         internal static float EDamage(Obj_AI_Base target)
         {

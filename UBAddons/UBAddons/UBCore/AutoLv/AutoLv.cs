@@ -120,6 +120,7 @@ namespace UBAddons.UBCore.AutoLv
                                     }
                                     break;
                             }
+                            fastconfig.SelectedIndex = 0;
                             fastconfig.CurrentValue = 0;
                             for (var i = 1; i <= 18; i++)
                             {
@@ -217,7 +218,7 @@ namespace UBAddons.UBCore.AutoLv
         private static void OnLevelUp()
         {
             if (!LvMenu.VChecked("Enable") || Player.Instance.SpellTrainingPoints.Equals(0)) return;
-            LevelUp(Database.ConvertToSpellSlot()[Player.Instance.Level - 1]);           
+            LevelUp(Database.ConvertToSpellSlot()[Player.Instance.Level - Player.Instance.SpellTrainingPoints]);           
         }
         private static void LevelUp(SpellSlot slot)
         {
@@ -240,18 +241,12 @@ namespace UBAddons.UBCore.AutoLv
 
         public void OnLoad()
         {
-            Initialize();
-        }
-
-        public static void Initialize()
-        {
             if (Initialized)
             {
                 return;
             }
             Initialized = true;
         }
-
         public bool ShouldExecuted()
         {
             return true;                 

@@ -15,9 +15,10 @@ namespace UBAddons.Libs.Dictionary
         private static float currentDistance { get; set; }
         private static int lastMoveClick { get; set; }
         public static List<Vector3[]> JumpSpots = new List<Vector3[]>();
+        private static Spell.SimpleSkillshot FleeSpell { get; set; }
         private static Vector3 LastMoveCommand
         {
-            get { return Player.Instance.Path.FirstOrDefault(); }
+            get { return Player.Instance.Path.LastOrDefault(); }
         }
         public static Vector3[] GetJumpSpot(int Range = 50)
         {
@@ -26,9 +27,29 @@ namespace UBAddons.Libs.Dictionary
                  .OrderBy(x => Player.Instance.Distance(x[0]))
                 .FirstOrDefault();
         }
-
         public void OnLoad()
         {
+            #region Init FleeSpell
+            switch (Player.Instance.Hero)
+            {
+                case Champion.Akali:
+                    {
+                        FleeSpell = new Spell.SimpleSkillshot(SpellSlot.W);
+                        break;
+                    }
+                case Champion.Ekko:
+                    {
+                        FleeSpell = new Spell.SimpleSkillshot(SpellSlot.E);
+                        break;
+                    }
+                default:
+                    {
+                        FleeSpell = null;
+                        break;
+                    }
+            }
+            #endregion
+
             #region InitSpots
             //blue side wolves - left wall (top)
             JumpSpots.Add(new[] { new Vector3(2809, 6936, 53), new Vector3(3058, 6960, 52) });
@@ -659,20 +680,19 @@ namespace UBAddons.Libs.Dictionary
 
         public bool ShouldExecuted()
         {
-            return Player.Instance.Hero.Equals(Champion.Ekko) && Orbwalker.ActiveModes.Flee.IsOrb();
+            return FleeSpell != null && Orbwalker.ActiveModes.Flee.IsOrb();
         }
 
         public void Execute()
         {
             var spot = GetJumpSpot(UBCore.CoreMenu.SpotJump["UBAddons.Core." + Player.Instance.Hero + ".Range"].Cast<Slider>().CurrentValue);
-            var _Fleespell = Player.Instance.Hero.Equals(Champion.Ekko) ? new Spell.SimpleSkillshot(SpellSlot.E) : new Spell.SimpleSkillshot(SpellSlot.W);
-            if (_Fleespell.IsReady()
+            if (FleeSpell.IsReady()
                 && spot != null
                 && Core.GameTickCount - lastMoveClick > 100)
             {
                 if (LastMoveCommand.Distance(spot[0]) <= UBCore.CoreMenu.SpotJump["UBAddons.Core." + Player.Instance.Hero + ".Range"].Cast<Slider>().CurrentValue && Player.Instance.Distance(spot[0]) <= 10)
                 {
-                    _Fleespell.Cast(spot[1]);
+                    FleeSpell.Cast(spot[1]);
                 }
                 //else if (Player.Instance.Distance(spot[0]) > 10 && Player.Instance.Distance(spot[0]) < UBCore.CoreMenu.SpotJump["UBAddons.Core." + Player.Instance.Hero + ".Range"].Cast<Slider>().CurrentValue)
                 //{

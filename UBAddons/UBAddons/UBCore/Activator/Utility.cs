@@ -7,6 +7,7 @@ using UBAddons.Libs;
 using UBAddons.General;
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Spells;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Enumerations;
 
@@ -24,12 +25,35 @@ namespace UBAddons.UBCore.Activator
         internal static void Stack()
         {
             if (!IsReady) return;
-            if (!Player.Instance.IsInShopRange() || Main.UtilityMenu.Get<CheckBox>("Stack") == null || !Main.UtilityMenu.VChecked("Stack")) return;
-            var Q = new Spell.Skillshot(SpellSlot.Q, 500, SkillShotType.Linear);
-            var E = new Spell.Skillshot(SpellSlot.W, 500, SkillShotType.Linear);
-            var W = new Spell.Skillshot(SpellSlot.E, 500, SkillShotType.Linear);
-            var R = new Spell.Skillshot(SpellSlot.R, 300, SkillShotType.Circular);
+            if (!Player.Instance.IsInShopRange() || Main.UtilityMenu["Stack"] == null || !Main.UtilityMenu.VChecked("Stack")) return;
+            var spellsInfo = SpellDatabase.GetSpellInfoList(Player.Instance);
+            if (spellsInfo == null)
+            {
+                return;
+            }
+            var skillshotlist = new List<Spell.Skillshot>();
+            SpellSlot[] slotlist = new SpellSlot[] { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R };
+            foreach (var slot in slotlist)
+            {
+                var spellInfo = spellsInfo.FirstOrDefault(i => i.Slot == slot);
+                if (spellInfo == null)
+                {
+                    continue;
+                }
+                skillshotlist.Add(new Spell.Skillshot(slot));
+            }
+            foreach (var skillshot in skillshotlist)
+            {
+                if (skillshot.IsReady() && IsReady && skillshot.Handle.SData.CooldownTime <= 15)
+                {
+                    if (skillshot.Cast(Player.Instance.Position.Extend(Game.CursorPos, 200).To3DWorld()))
+                    {
+                        LastStack = Game.Time;
+                    }
+                }
+            }
             #region Champion
+            /*
             switch (Player.Instance.ChampionName)
             {
                 case "Ahri":
@@ -275,6 +299,7 @@ namespace UBAddons.UBCore.Activator
                 default:
                     break;
             }
+            */
             #endregion
         }
         internal static void ChangeTrinket()
@@ -307,7 +332,7 @@ namespace UBAddons.UBCore.Activator
         {
             if (!ItemList.Utility.Any(x => x.IsOwned() && x.IsReady())) return;
             var item = ItemList.Utility.FirstOrDefault(x => x.IsOwned() && x.IsReady());
-            if (item.Id.Equals(ItemId.Youmuus_Ghostblade))
+            if (item.Id.Equals(ItemId.Youmuus_Ghostblade) || item.Id.Equals(ItemId.Edge_of_Night))
             {
                 if (!Orbwalker.ActiveModes.Combo.IsOrb() || !Main.UtilityMenu.VChecked(item.Id + ".Enabled")) return;
                 if (Player.Instance.CountEnemyChampionsInRange(1000) < float.Epsilon || Player.Instance.CountAllyChampionsInRange(1000) < 2) return;
@@ -322,11 +347,11 @@ namespace UBAddons.UBCore.Activator
                 };
                 var castPos = spell.GetBestCircularCastPosition(EntityManager.Heroes.Allies, Main.UtilityMenu.VSliderValue(item.Id + ".Percent"));
                 var castPos2 = spell.GetBestCircularCastPosition(EntityManager.Heroes.Enemies, Main.UtilityMenu.VSliderValue(item.Id + ".Percent"));
-                if (castPos.HitNumber > Main.UtilityMenu.VSliderValue(item.Id + ".Hit.Enemy"))
+                if (castPos.HitNumber >= Main.UtilityMenu.VSliderValue(item.Id + ".Hit.Enemy"))
                 {
                     item.Cast(castPos.CastPosition);
                 }
-                if (castPos2.HitNumber > Main.UtilityMenu.VSliderValue(item.Id + ".Hit.Ally"))
+                if (castPos2.HitNumber >= Main.UtilityMenu.VSliderValue(item.Id + ".Hit.Ally"))
                 {
                     item.Cast(castPos2.CastPosition);
                 }
@@ -343,9 +368,8 @@ namespace UBAddons.UBCore.Activator
                 return;
             if (!ItemList.Potions.Any(x => x.IsOwned() && x.IsReady())) return;
             var potions = ItemList.Potions.FirstOrDefault(x => x.IsOwned() && x.IsReady());
-            if (Main.Potions.Get<CheckBox>(potions.Id.ToString()) == null ||!Main.Potions.VChecked(potions.Id.ToString()) || Main.Potions.VSliderValue(potions.Id + ".HP") > Player.Instance.HealthPercent) return;
-            if (potions.Id.Equals(ItemId.Hunters_Potion) && Player.Instance.Mana + 35 >= Player.Instance.MaxMana && Main.Potions.VChecked(potions.Id + ".MP") && !Variables.IsNomana) return;
-            if (potions.Id.Equals(ItemId.Corrupting_Potion) && Player.Instance.Mana + 35 >= Player.Instance.MaxMana && Main.Potions.VChecked(potions.Id + ".MP") && !Variables.IsNomana) return;
+            if (Main.Potions[potions.Id.ToString()] == null ||!Main.Potions.VChecked(potions.Id.ToString()) || Main.Potions.VSliderValue(potions.Id + ".HP") > Player.Instance.HealthPercent) return;
+            if ((potions.Id.Equals(ItemId.Hunters_Potion) || potions.Id.Equals(ItemId.Corrupting_Potion)) && Player.Instance.Mana + 35 >= Player.Instance.MaxMana && Main.Potions.VChecked(potions.Id + ".MP") && !Variables.IsNomana) return;
             potions.Cast();
         }
     }

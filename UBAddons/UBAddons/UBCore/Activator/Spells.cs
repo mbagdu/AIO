@@ -12,72 +12,59 @@ namespace UBAddons.UBCore.Activator
 {
     class Spells
     {
-        internal static readonly List<Spell.SpellBase> SummonerList = new List<Spell.SpellBase>();
-        internal static Spell.Active Barrier
+        private static bool Initialized { get; set; }
+        private static Spell.Active Barrier = SummonerSpells.Barrier;
+        internal static Spell.Active Cleanse = SummonerSpells.Cleanse;
+        private static Spell.Targeted Exhaust = SummonerSpells.Exhaust;
+        private static Spell.Active Heal = SummonerSpells.Heal;
+        private static Spell.Targeted Ignite = SummonerSpells.Ignite;
+        private static Spell.Skillshot Mark = SummonerSpells.Mark;
+        private static Spell.Targeted Smite = SummonerSpells.Smite;
+
+        private static readonly Dictionary<SummonerSpellsEnum, Spell.SpellBase> SummonerList = new Dictionary<SummonerSpellsEnum, Spell.SpellBase>()
         {
-            get
-            {
-                return SummonerSpells.PlayerHas(SummonerSpellsEnum.Barrier) ? SummonerSpells.Barrier : null;
-            }
-        }
-        internal static Spell.Active Cleanse
-        {
-            get
-            {
-                return SummonerSpells.PlayerHas(SummonerSpellsEnum.Cleanse) ? SummonerSpells.Cleanse : null;
-            }
-        }
-        internal static Spell.Targeted Exhaust
-        {
-            get
-            {
-                return SummonerSpells.PlayerHas(SummonerSpellsEnum.Exhaust) ? SummonerSpells.Exhaust : null;
-            }
-        }
-        internal static Spell.Active Heal
-        {
-            get
-            {
-                return SummonerSpells.PlayerHas(SummonerSpellsEnum.Heal) ? SummonerSpells.Heal : null;
-            }
-        }
-        internal static Spell.Targeted Ignite
-        {
-            get
-            {
-                return SummonerSpells.PlayerHas(SummonerSpellsEnum.Ignite) ? SummonerSpells.Ignite : null;
-            }
-        }
-        internal static Spell.Skillshot Mark
-        {
-            get
-            {
-                return SummonerSpells.PlayerHas(SummonerSpellsEnum.Mark) ? SummonerSpells.Mark : null;
-            }
-        }
-        internal static Spell.Targeted Smite
-        {
-            get
-            {
-                return SummonerSpells.PlayerHas(SummonerSpellsEnum.Smite) ? SummonerSpells.Smite : null;
-            }
-        }
+            { SummonerSpellsEnum.Barrier, Barrier },
+            { SummonerSpellsEnum.Exhaust, Exhaust },
+            { SummonerSpellsEnum.Heal, Heal },
+            { SummonerSpellsEnum.Ignite, Ignite },
+            { SummonerSpellsEnum.Mark, Mark },
+            { SummonerSpellsEnum.Smite, Smite },
+        };
         static Spells()
         {
-            SummonerList.Add(Barrier);
-            SummonerList.Add(Exhaust);
-            SummonerList.Add(Heal);
-            SummonerList.Add(Ignite);
-            SummonerList.Add(Mark);
-            SummonerList.Add(Smite);
+            var keys = SummonerList.Where(x => x.Value.Slot == SpellSlot.Unknown).Select(x => x.Key).ToList();
+            foreach (var key in keys)
+            {
+                SummonerList.Remove(key);
+            }
+            if (SummonerSpells.PlayerHas(SummonerSpellsEnum.Barrier))
+            {
+                GameObject.OnCreate += GameObject_OnCreate;
+                Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
+            }
         }
-        public static void UseSummoner(SummonerSpellsEnum summoner)
+        public static void OnLoad()
+        {
+            if (Initialized)
+            {
+                return;
+            }
+            Initialized = true;
+        }
+        internal static void OnTick()
+        {
+            foreach (var spells in SummonerList.Where(x => x.Value.IsReady()))
+            {
+                UseSummoner(spells.Key);
+            }
+        }
+        private static void UseSummoner(SummonerSpellsEnum summoner)
         {
             switch (summoner)
             {
                 case SummonerSpellsEnum.Exhaust:
                     {
-                        if (Exhaust == null || !Exhaust.IsReady() || !Main.SpellsMenu.VChecked("Exhaust.Enabled") || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Exhaust.Stealth"))
+                        if (!Exhaust.IsReady() || !Main.SpellsMenu.VChecked("Exhaust.Enabled") || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Exhaust.Stealth"))
                             || (Main.SpellsMenu.VChecked("Exhaust.Combo") && !Orbwalker.ActiveModes.Combo.IsOrb()))
                         {
                             break;
@@ -126,7 +113,7 @@ namespace UBAddons.UBCore.Activator
                     break;
                 case SummonerSpellsEnum.Heal:
                     {
-                        if (Heal == null || !Heal.IsReady() || !Main.SpellsMenu.VChecked("Heal.Enabled") || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Heal.Stealth"))
+                        if (!Heal.IsReady() || !Main.SpellsMenu.VChecked("Heal.Enabled") || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Heal.Stealth"))
                             || (Main.SpellsMenu.VChecked("Heal.Combo") && !Orbwalker.ActiveModes.Combo.IsOrb()))
                         {
                             break;
@@ -146,7 +133,7 @@ namespace UBAddons.UBCore.Activator
                     break;
                 case SummonerSpellsEnum.Ignite:
                     {
-                        if (Ignite == null || !Ignite.IsReady() || !Main.SpellsMenu.VChecked("Ignite.Enabled")
+                        if (!Ignite.IsReady() || !Main.SpellsMenu.VChecked("Ignite.Enabled")
                             || (Main.SpellsMenu.VChecked("Ignite.Combo") && !Orbwalker.ActiveModes.Combo.IsOrb()))
                         {
                             break;
@@ -164,7 +151,7 @@ namespace UBAddons.UBCore.Activator
                     break;
                 case SummonerSpellsEnum.Mark:
                     {
-                        if (Mark == null || !Mark.IsReady() || !Main.SpellsMenu.VChecked("Mark.Enabled")
+                        if (!Mark.IsReady() || !Main.SpellsMenu.VChecked("Mark.Enabled")
                             || !Orbwalker.ActiveModes.Combo.IsOrb())
                         {
                             break;
@@ -180,7 +167,7 @@ namespace UBAddons.UBCore.Activator
                     break;
                 case SummonerSpellsEnum.Smite:
                     {
-                        if (Smite == null || !Smite.IsReady() || !Main.SpellsMenu.VChecked("Smite.Enabled"))
+                        if (!Smite.IsReady() || !Main.SpellsMenu.VChecked("Smite.Enabled"))
                         {
                             break;
                         }
@@ -202,7 +189,7 @@ namespace UBAddons.UBCore.Activator
                     break;
                 case SummonerSpellsEnum.Barrier:
                     {
-                        if (Barrier == null || !Barrier.IsReady() || !Main.SpellsMenu.VChecked("Barrier.Enabled") || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Barrier.Stealth"))
+                        if (!Barrier.IsReady() || !Main.SpellsMenu.VChecked("Barrier.Enabled") || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Barrier.Stealth"))
                             || (Main.SpellsMenu.VChecked("Barrier.Combo") && !Orbwalker.ActiveModes.Combo.IsOrb()) || Player.Instance.HealthPercent > Main.SpellsMenu.VSliderValue("Barrier.MyHP"))
                         {
                             break;
@@ -221,7 +208,7 @@ namespace UBAddons.UBCore.Activator
         }
         internal static void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (Barrier == null || !sender.IsEnemy || args.Target == null || !args.Target.IsMe || !Main.SpellsMenu.VChecked("Barrier.Enabled")
+            if (!Barrier.IsReady() || !sender.IsEnemy || args.Target == null || !args.Target.IsMe || !Main.SpellsMenu.VChecked("Barrier.Enabled")
                 || (Main.SpellsMenu.VChecked("Barrier.Combo") && !Orbwalker.ActiveModes.Combo.IsOrb()) || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Barrier.Stealth"))) return;
             var caster = sender as AIHeroClient;
             var Target = args.Target as AIHeroClient;
@@ -233,7 +220,7 @@ namespace UBAddons.UBCore.Activator
         }
         internal static void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            if (Barrier == null  || sender == null || (Main.SpellsMenu.VChecked("Barrier.Combo") && !Orbwalker.ActiveModes.Combo.IsOrb()) 
+            if (!Barrier.IsReady() || sender == null || (Main.SpellsMenu.VChecked("Barrier.Combo") && !Orbwalker.ActiveModes.Combo.IsOrb()) 
                 || (Player.HasBuffOfType(BuffType.Invisibility) && Main.SpellsMenu.VChecked("Barrier.Stealth"))) return;
             var misile = sender as MissileClient;
             if (misile == null || misile.Target == null || !misile.SpellCaster.IsEnemy || !misile.Target.IsMe) return;

@@ -11,15 +11,15 @@ namespace UBAddons.Champions.TwistedFate.Modes
             if (MenuValue.JungleClear.UseQ && Q.IsReady())
             {
                 var JungleMob = Q.GetJungleMobs();
-                if (JungleMob != null)
+                if (JungleMob.Any())
                 {
                     Q.Cast(JungleMob.First());
                 }
             }
             if (MenuValue.JungleClear.UseW && W.IsReady())
             {
-                var monster = W.GetJungleMobs();
-                if (monster != null)
+                var JungleMob = W.GetJungleMobs();
+                if (JungleMob.Any())
                 {
                     LogicPickedCard(MenuValue.JungleClear.UseW, MenuValue.JungleClear.WLogic);
                 }
