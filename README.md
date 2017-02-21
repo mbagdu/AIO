@@ -1,8 +1,9 @@
 # AIO
-Here is my AIO
+<a href="https://www.elobuddy.net/topic/44536-73-ubaddons-warwick-added">Here is my AIO</a><br>
 
 ## Avaiable Champ:
 * Ahri
+* Akali
 * Alistar
 * Anivia
 * Annie
@@ -25,6 +26,7 @@ Here is my AIO
 * Twitch
 * Veigar
 * Velkoz
+* Vi
 * Viktor
 * Warwick
 * Xerath
@@ -34,7 +36,7 @@ Here is my AIO
 
 ## To Do:
 * Gnar
-* 10 middle champ remaining
+* 7 middle champ remaining
 * More...
 
 If you wanna to help me develop it, contact me.
